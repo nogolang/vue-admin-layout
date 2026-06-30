@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   Odometer,
@@ -15,6 +15,7 @@ import {
 } from '@element-plus/icons-vue'
 import { useLayoutStore } from '@/stores/layout'
 import { usePermissionStore } from '@/stores/permission'
+import LayoutTabbar from './components/Tabbar.vue'
 import type { MenuItem } from '@/router/menus'
 
 defineOptions({ name: 'BasicLayout' })
@@ -41,20 +42,32 @@ const iconMap: Record<string, any> = {
 // ==================== 垂直侧边栏逻辑 ====================
 const menuRef = ref<any>(null)
 
-/** 根据当前路径自动展开所属的父级 sub-menu */
-function openActiveSubmenus(path: string) {
-  for (const menu of menuList.value) {
-    if (menu.children?.some((c) => path.startsWith(c.path))) {
-      menuRef.value?.open(menu.path)
+/** 根据当前路径 + 已加载菜单，展开对应的父级 sub-menu */
+function openActiveSubmenus() {
+  const path = route.path
+  const menus = menuList.value
+  if (!menus.length) return
+
+  // nextTick 确保 el-menu DOM 已就绪（动态路由加载后菜单才渲染）
+  nextTick(() => {
+    for (const menu of menus) {
+      if (menu.children?.some((c) => path.startsWith(c.path))) {
+        menuRef.value?.open(menu.path)
+      }
     }
-  }
+  })
 }
 
-// mounted 时补充打开（immediate watch 时 el-menu 尚未挂载）
-onMounted(() => openActiveSubmenus(route.path))
+// DOM 挂载后首次打开
+onMounted(() => openActiveSubmenus())
 
-// 路由变化时自动展开对应 sub-menu
-watch(() => route.path, openActiveSubmenus)
+// 路由变化时重新展开
+watch(() => route.path, () => openActiveSubmenus())
+
+// 动态路由加载完成后重新展开（此时 menuList 才包含完整数据）
+watch(() => permissionStore.isRoutesLoaded, (loaded) => {
+  if (loaded) openActiveSubmenus()
+})
 
 // ==================== 双列侧边栏逻辑 ====================
 
@@ -85,15 +98,19 @@ const activeTopMenuName = computed(() => {
   return menu?.name || ''
 })
 
-// 路由变化时同步顶级菜单激活状态
-watch(
-  () => route.path,
-  (path) => {
-    const top = findTopMenu(path)
-    if (top) activeTopMenu.value = top
-  },
-  { immediate: true },
-)
+/** 同步顶级菜单激活状态 */
+function syncActiveTopMenu() {
+  const top = findTopMenu(route.path)
+  if (top) activeTopMenu.value = top
+}
+
+// 动态路由加载完成后同步（此时 menuList 才有完整数据）
+watch(() => permissionStore.isRoutesLoaded, (loaded) => {
+  if (loaded) syncActiveTopMenu()
+})
+
+// 路由变化时同步
+watch(() => route.path, () => syncActiveTopMenu())
 
 /** 点击第一列图标：
  *  - 无子菜单 → 直接导航
@@ -281,7 +298,11 @@ function handleTopMenuClick(menu: MenuItem) {
 
       <!-- ==================== 主内容区 ==================== -->
       <main class="admin-main">
-        <RouterView />
+        <!-- 多标签页 —— 位于内容区顶部，不横跨侧边栏 -->
+        <LayoutTabbar />
+        <div class="admin-content">
+          <RouterView />
+        </div>
       </main>
     </div>
   </div>
@@ -641,8 +662,16 @@ function handleTopMenuClick(menu: MenuItem) {
 /* ==================== 主内容区 ==================== */
 .admin-main {
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background: var(--content-bg);
+}
+
+/* 内容滚动区（标签页下方） */
+.admin-content {
+  flex: 1;
+  overflow-y: auto;
   padding: 16px;
 }
 </style>
