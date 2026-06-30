@@ -1,3 +1,42 @@
+/* ==================== 全局 CSS 变量 ==================== */
+:root {
+  /* 布局尺寸 */
+  --header-height: 50px;
+  --sidebar-width: 224px;
+  --sidebar-collapse-width: 60px;
+  --sidebar-mixed-width: 80px;
+  --sidebar-extra-width: 224px;
+
+  /* 侧边栏 */
+  --sidebar-bg: #fff;
+  --sidebar-deep-bg: #f5f6f8;
+  --sidebar-text: hsl(240 6% 10% / 75%);
+  --sidebar-text-hover: hsl(240 6% 10%);
+  --sidebar-text-muted: hsl(240 4% 46%);
+  --sidebar-active-bg: hsl(212 100% 45% / 12%);
+  --sidebar-active-text: hsl(212 100% 45%);
+  --sidebar-hover-bg: hsl(240 5% 96%);
+  --sidebar-border: hsl(240 5.9% 90%);
+  --sidebar-arrow: hsl(240 4% 46%);
+  --sidebar-collapse-text: hsl(240 4% 46%);
+
+  /* 顶部 Header */
+  --header-bg: #fff;
+  --header-border: hsl(240 5.9% 90%);
+
+  /* 内容区 */
+  --content-bg: hsl(216 20.11% 95.47%);
+
+  /* 菜单项 */
+  --menu-item-height: 38px;
+  --menu-item-margin-y: 2px;
+  --menu-item-margin-x: 8px;
+  --menu-item-radius: 8px;
+  --menu-font-size: 14px;
+  --menu-icon-size: 16px;
+}
+
+/* ==================== 全局基础样式 ==================== */
 *,
 *::before,
 *::after {
@@ -21,8 +60,8 @@ body {
     'Helvetica Neue',
     sans-serif;
   font-size: 14px;
-  color: #303133;
-  background: #f0f2f5;
+  color: hsl(240 6% 10%);
+  background: hsl(216 20.11% 95.47%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

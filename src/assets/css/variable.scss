@@ -1,2 +1,23 @@
-// 全局 SCSS 变量 —— 所有 .vue 的 <style lang="scss"> 自动引入
-// vite.config.ts → css.preprocessorOptions.scss.additionalData
+// ==================== 全局 SCSS 变量 ====================
+// 通过 vite additionalData 自动注入所有 <style lang="scss">
+// 用法：直接写 $color-primary，不需要 @use
+
+// 主色
+$color-primary: hsl(212 100% 45%);
+$color-primary-light: hsl(212 100% 45% / 12%);
+
+// 文字
+$color-text-primary: hsl(240 6% 10%);
+$color-text-secondary: hsl(240 6% 10% / 75%);
+$color-text-muted: hsl(240 4% 46%);
+
+// 背景
+$color-bg-hover: hsl(240 5% 96%);
+$color-bg-content: hsl(216 20.11% 95.47%);
+
+// 边框
+$color-border: hsl(240 5.9% 90%);
+
+// 侧边栏
+$color-sidebar-bg: #fff;
+$color-sidebar-deep-bg: #f5f6f8;

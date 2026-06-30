@@ -311,34 +311,8 @@ function handleTopMenuClick(menu: MenuItem) {
 </template>
 
 <style scoped lang="scss">
-/* ==================== CSS 变量（对齐 vben 设计规范） ==================== */
+/* ==================== 布局壳 ==================== */
 .admin-layout {
-  --header-height: 50px;
-  --sidebar-width: 224px;
-  --sidebar-collapse-width: 60px;
-  --sidebar-mixed-width: 80px;         /* 双列模式第一列宽度 */
-  --sidebar-extra-width: 224px;        /* 双列模式第二列宽度 */
-  --sidebar-bg: #fff;
-  --sidebar-deep-bg: #f5f6f8;
-  --sidebar-text: hsl(240 6% 10% / 75%);
-  --sidebar-text-hover: hsl(240 6% 10%);
-  --sidebar-text-muted: hsl(240 4% 46%);
-  --sidebar-active-bg: hsl(212 100% 45% / 12%);
-  --sidebar-active-text: hsl(212 100% 45%);
-  --sidebar-hover-bg: hsl(240 5% 96%);
-  --sidebar-border: hsl(240 5.9% 90%);
-  --sidebar-arrow: hsl(240 4% 46%);
-  --sidebar-collapse-text: hsl(240 4% 46%);
-  --header-bg: #fff;
-  --header-border: hsl(240 5.9% 90%);
-  --content-bg: hsl(216 20.11% 95.47%);
-  --menu-item-height: 38px;
-  --menu-item-margin-y: 2px;
-  --menu-item-margin-x: 8px;
-  --menu-item-radius: 8px;
-  --menu-font-size: 14px;
-  --menu-icon-size: 16px;
-
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -405,7 +379,7 @@ function handleTopMenuClick(menu: MenuItem) {
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  color: hsl(240 6% 10%);
+  color: $color-text-primary;
   font-size: 14px;
   padding: 4px 8px;
   border-radius: 6px;
@@ -413,7 +387,7 @@ function handleTopMenuClick(menu: MenuItem) {
 }
 
 .user-info:hover {
-  background: hsl(240 5% 96%);
+  background: $color-bg-hover;
 }
 
 /* ==================== Body ==================== */
@@ -659,66 +633,61 @@ function handleTopMenuClick(menu: MenuItem) {
 }
 </style>
 
-<style>
+<style lang="scss">
 /*
  * el-menu 折叠弹出菜单（不能 scoped —— el-popper 被 Teleport 到 body）
  *
- * DOM 层级：
- * <div class="el-popper el-tooltip menu-popup">
- *   <div class="el-menu--popup-container menu-popup">
- *     <ul class="el-menu el-menu--popup">        ← 实际背景在这个元素上
- *       <li class="el-menu-item">...</li>
- *     </ul>
- *   </div>
- * </div>
+ * DOM：<div class="el-popper el-tooltip menu-popup">
+ *        <div class="el-menu--popup-container menu-popup">
+ *          <ul class="el-menu el-menu--popup">
+ *            <li class="el-menu-item">...</li>
+ *          </ul>
+ *        </div>
+ *      </div>
  */
-
-/* 弹窗容器 —— 圆角 + 背景统一设在 .menu-popup 自身，父层透明 */
 .menu-popup {
   border-radius: 15px !important;
   overflow: hidden;
+
+  .el-menu--popup {
+    background: var(--sidebar-bg) !important;
+  }
+
+  &.el-zoom-in-left-enter-active,
+  &.el-zoom-in-left-leave-active {
+    transition-duration: 0.25s !important;
+  }
+
+  .el-menu-item {
+    height: 38px;
+    line-height: 38px;
+    margin: 2px 8px;
+    padding: 0 12px !important;
+    font-size: 14px;
+    color: var(--sidebar-text);
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      color: var(--sidebar-text-hover);
+      background: var(--sidebar-hover-bg);
+    }
+    &.is-active {
+      color: var(--sidebar-active-text);
+      background: var(--sidebar-active-bg);
+    }
+  }
+
+  .el-icon {
+    font-size: 16px;
+    transition: transform 0.25s;
+  }
+  .el-menu-item:hover .el-icon {
+    transform: scale(1.2);
+  }
 }
-/* 把 ElPlus 默认的白色背景压透明，让 .menu-popup 的背景透出来 */
+
 .el-popper.is-light.menu-popup {
   background: transparent !important;
-}
-.menu-popup .el-menu--popup {
-  background: var(--sidebar-bg, #fff) !important;
-}
-
-/* 过渡时长 —— 弹窗用 el-zoom-in-left（源码 sub-menu.mjs:107），过渡类加在 .menu-popup 同元素上 */
-.menu-popup.el-zoom-in-left-enter-active,
-.menu-popup.el-zoom-in-left-leave-active {
-  //transition-duration: 0.1s !important;
-  transition-duration: 0.25s !important;
-}
-
-/* 弹窗菜单项 */
-.menu-popup .el-menu-item {
-  height: 38px;
-  line-height: 38px;
-  margin: 2px 8px;
-  padding: 0 12px !important;
-  font-size: 14px;
-  color: hsl(240 6% 10% / 75%);
-  border-radius: 6px;
-  transition: background 0.15s, color 0.15s;
-}
-.menu-popup .el-menu-item:hover {
-  color: hsl(240 6% 10%);
-  background: hsl(240 5% 96%);
-}
-.menu-popup .el-menu-item.is-active {
-  color: hsl(212 100% 45%);
-  background: hsl(212 100% 45% / 12%);
-}
-
-/* 弹窗图标 */
-.menu-popup .el-icon {
-  font-size: 16px;
-  transition: transform 0.25s;
-}
-.menu-popup .el-menu-item:hover .el-icon {
-  transform: scale(1.2);
 }
 </style>

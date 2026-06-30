@@ -227,11 +227,11 @@ const currentAffix = () => {
     padding: 0 12px;
     border: none;
     border-right: 1px solid var(--header-border, hsl(240 5.9% 90%));
-    color: hsl(240 4% 46%);
-    background: hsl(240 5% 96%);
+    color: $color-text-muted;
+    background: $color-bg-hover;
 
     &.is-active {
-      color: hsl(240 6% 10%);
+      color: $color-text-primary;
       background: #fff;
     }
   }
@@ -262,12 +262,12 @@ const currentAffix = () => {
 .context-item {
   padding: 6px 16px;
   font-size: 13px;
-  color: hsl(240 6% 10%);
+  color: $color-text-primary;
   cursor: pointer;
   transition: background 0.15s;
 
   &:hover {
-    background: hsl(240 5% 96%);
+    background: $color-bg-hover;
   }
 }
 </style>
