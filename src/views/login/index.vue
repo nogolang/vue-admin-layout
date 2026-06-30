@@ -12,7 +12,7 @@ defineOptions({ name: 'LoginView' })
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .login-page {
   display: flex;
   flex-direction: column;

@@ -9,7 +9,7 @@ defineOptions({ name: 'DashboardView' })
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .page-dashboard {
   padding: 0;
 }

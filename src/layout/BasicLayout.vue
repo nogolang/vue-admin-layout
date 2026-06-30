@@ -189,7 +189,8 @@ function handleTopMenuClick(menu: MenuItem) {
             :default-active="route.path"
             :collapse="layoutStore.sidebarCollapsed"
             router
-            class="sidebar-el-menu"
+            class="sidebar-el-menu menu-override"
+            popper-class="menu-popup"
           >
             <template v-for="item in menuList" :key="item.path">
               <!-- 有子菜单 → el-sub-menu -->
@@ -260,7 +261,8 @@ function handleTopMenuClick(menu: MenuItem) {
             <el-menu
               :default-active="route.path"
               router
-              class="extra-el-menu"
+              class="extra-el-menu menu-override"
+              popper-class="menu-popup"
             >
               <template v-for="child in extraMenus" :key="child.path">
                 <el-sub-menu
@@ -308,7 +310,7 @@ function handleTopMenuClick(menu: MenuItem) {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 /* ==================== CSS 变量（对齐 vben 设计规范） ==================== */
 .admin-layout {
   --header-height: 50px;
@@ -460,108 +462,89 @@ function handleTopMenuClick(menu: MenuItem) {
   color: var(--sidebar-text-hover);
 }
 
-/* ==================== 覆盖 Element Plus Menu 样式 ==================== */
-.sidebar-el-menu,
-.extra-el-menu {
+/* ========== 菜单覆盖（.menu-override 挂在 sidebar-el-menu 和 extra-el-menu 上） ========== */
+.menu-override {
   border-right: none !important;
   background: transparent !important;
+
+  // ---- 菜单项 ----
+  :deep(.el-menu-item) {
+    height: var(--menu-item-height);
+    line-height: var(--menu-item-height);
+    margin: var(--menu-item-margin-y) var(--menu-item-margin-x);
+    padding: 0 12px !important;
+    font-size: var(--menu-font-size);
+    color: var(--sidebar-text);
+    border-radius: var(--menu-item-radius);
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      color: var(--sidebar-text-hover);
+      background: var(--sidebar-hover-bg) !important;
+    }
+    &.is-active {
+      color: var(--sidebar-active-text);
+      background: var(--sidebar-active-bg) !important;
+    }
+  }
+
+  // ---- sub-menu 标题 ----
+  :deep(.el-sub-menu__title) {
+    height: var(--menu-item-height);
+    line-height: var(--menu-item-height);
+    margin: var(--menu-item-margin-y) var(--menu-item-margin-x);
+    padding: 0 12px !important;
+    font-size: var(--menu-font-size);
+    color: var(--sidebar-text);
+    border-radius: var(--menu-item-radius);
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      color: var(--sidebar-text-hover);
+      background: var(--sidebar-hover-bg) !important;
+    }
+  }
+  :deep(.el-sub-menu.is-active > .el-sub-menu__title),
+  :deep(.el-sub-menu.is-opened > .el-sub-menu__title) {
+    color: var(--sidebar-active-text);
+  }
+
+  // ---- 子菜单缩进 ----
+  :deep(.el-sub-menu .el-menu-item) {
+    padding-left: 44px !important;
+  }
+  :deep(.el-sub-menu .el-sub-menu .el-menu-item) {
+    padding-left: 60px !important;
+  }
+
+  // ---- 展开箭头 ----
+  :deep(.el-sub-menu__icon-arrow) {
+    color: var(--sidebar-arrow);
+    transition: transform 0.25s;
+  }
+
+  // ---- 图标 ----
+  :deep(.el-menu-item .el-icon),
+  :deep(.el-sub-menu__title .el-icon) {
+    font-size: var(--menu-icon-size);
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  :deep(.el-menu-item:hover .el-icon),
+  :deep(.el-sub-menu__title:hover .el-icon) {
+    transform: scale(1.2);
+  }
 }
 
-/* 菜单项基础样式 */
-.sidebar-el-menu :deep(.el-menu-item),
-.extra-el-menu :deep(.el-menu-item) {
-  height: var(--menu-item-height);
-  line-height: var(--menu-item-height);
-  margin: var(--menu-item-margin-y) var(--menu-item-margin-x);
-  padding: 0 12px !important;
-  font-size: var(--menu-font-size);
-  color: var(--sidebar-text);
-  border-radius: var(--menu-item-radius);
-  transition: background 0.15s, color 0.15s;
-}
-
-/* hover 状态 */
-.sidebar-el-menu :deep(.el-menu-item:hover),
-.extra-el-menu :deep(.el-menu-item:hover) {
-  color: var(--sidebar-text-hover);
-  background: var(--sidebar-hover-bg) !important;
-}
-
-/* 激活状态 */
-.sidebar-el-menu :deep(.el-menu-item.is-active),
-.extra-el-menu :deep(.el-menu-item.is-active) {
-  color: var(--sidebar-active-text);
-  background: var(--sidebar-active-bg) !important;
-}
-
-/* sub-menu 标题 */
-.sidebar-el-menu :deep(.el-sub-menu__title),
-.extra-el-menu :deep(.el-sub-menu__title) {
-  height: var(--menu-item-height);
-  line-height: var(--menu-item-height);
-  margin: var(--menu-item-margin-y) var(--menu-item-margin-x);
-  padding: 0 12px !important;
-  font-size: var(--menu-font-size);
-  color: var(--sidebar-text);
-  border-radius: var(--menu-item-radius);
-  transition: background 0.15s, color 0.15s;
-}
-
-.sidebar-el-menu :deep(.el-sub-menu__title:hover),
-.extra-el-menu :deep(.el-sub-menu__title:hover) {
-  color: var(--sidebar-text-hover);
-  background: var(--sidebar-hover-bg) !important;
-}
-
-/* 子菜单激活/展开时标题高亮 */
-.sidebar-el-menu :deep(.el-sub-menu.is-active > .el-sub-menu__title),
-.sidebar-el-menu :deep(.el-sub-menu.is-opened > .el-sub-menu__title),
-.extra-el-menu :deep(.el-sub-menu.is-active > .el-sub-menu__title),
-.extra-el-menu :deep(.el-sub-menu.is-opened > .el-sub-menu__title) {
-  color: var(--sidebar-active-text);
-}
-
-/* 子菜单项缩进 —— 体现层级关系 */
-.sidebar-el-menu :deep(.el-sub-menu .el-menu-item),
-.extra-el-menu :deep(.el-sub-menu .el-menu-item) {
-  padding-left: 44px !important;
-}
-/* 三级菜单进一步缩进 */
-.sidebar-el-menu :deep(.el-sub-menu .el-sub-menu .el-menu-item),
-.extra-el-menu :deep(.el-sub-menu .el-sub-menu .el-menu-item) {
-  padding-left: 60px !important;
-}
-
-/* 展开箭头 */
-.sidebar-el-menu :deep(.el-sub-menu__icon-arrow),
-.extra-el-menu :deep(.el-sub-menu__icon-arrow) {
-  color: var(--sidebar-arrow);
-  transition: transform 0.25s;
-}
-
-/* 折叠模式下内容居中 */
-.sidebar-el-menu :deep(.el-menu--collapse) .el-menu-item,
-.sidebar-el-menu :deep(.el-menu--collapse) .el-sub-menu__title {
-  justify-content: center;
-  padding: 0 !important;
-}
-
-/* 图标基础样式 */
-.sidebar-el-menu :deep(.el-menu-item .el-icon),
-.extra-el-menu :deep(.el-menu-item .el-icon),
-.sidebar-el-menu :deep(.el-sub-menu__title .el-icon),
-.extra-el-menu :deep(.el-sub-menu__title .el-icon) {
-  font-size: var(--menu-icon-size);
-  transition: transform 0.25s;
-  flex-shrink: 0;
-}
-
-/* hover 时图标放大 */
-.sidebar-el-menu :deep(.el-menu-item:hover .el-icon),
-.extra-el-menu :deep(.el-menu-item:hover .el-icon),
-.sidebar-el-menu :deep(.el-sub-menu__title:hover .el-icon),
-.extra-el-menu :deep(.el-sub-menu__title:hover .el-icon) {
-  transform: scale(1.2);
+// ---- 折叠模式（仅 sidebar-el-menu） ----
+.sidebar-el-menu {
+  :deep(.el-menu--collapse) {
+    .el-menu-item,
+    .el-sub-menu__title {
+      justify-content: center;
+      padding: 0 !important;
+    }
+  }
 }
 
 .menu-title-wrap {
@@ -604,17 +587,17 @@ function handleTopMenuClick(menu: MenuItem) {
   background: var(--sidebar-hover-bg);
 }
 
-.mixed-menu-item:hover :deep(.el-icon) {
-  transform: scale(1.2);
-}
-
-.mixed-menu-item.active {
-  color: var(--sidebar-active-text);
-  background: var(--sidebar-active-bg);
-}
-
-.mixed-menu-item :deep(.el-icon) {
-  transition: transform 0.25s;
+.mixed-menu-item {
+  &:hover :deep(.el-icon) {
+    transform: scale(1.2);
+  }
+  &.active {
+    color: var(--sidebar-active-text);
+    background: var(--sidebar-active-bg);
+  }
+  :deep(.el-icon) {
+    transition: transform 0.25s;
+  }
 }
 
 .mixed-menu-label {
@@ -673,5 +656,69 @@ function handleTopMenuClick(menu: MenuItem) {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
+}
+</style>
+
+<style>
+/*
+ * el-menu 折叠弹出菜单（不能 scoped —— el-popper 被 Teleport 到 body）
+ *
+ * DOM 层级：
+ * <div class="el-popper el-tooltip menu-popup">
+ *   <div class="el-menu--popup-container menu-popup">
+ *     <ul class="el-menu el-menu--popup">        ← 实际背景在这个元素上
+ *       <li class="el-menu-item">...</li>
+ *     </ul>
+ *   </div>
+ * </div>
+ */
+
+/* 弹窗容器 —— 圆角 + 背景统一设在 .menu-popup 自身，父层透明 */
+.menu-popup {
+  border-radius: 15px !important;
+  overflow: hidden;
+}
+/* 把 ElPlus 默认的白色背景压透明，让 .menu-popup 的背景透出来 */
+.el-popper.is-light.menu-popup {
+  background: transparent !important;
+}
+.menu-popup .el-menu--popup {
+  background: var(--sidebar-bg, #fff) !important;
+}
+
+/* 过渡时长 —— 弹窗用 el-zoom-in-left（源码 sub-menu.mjs:107），过渡类加在 .menu-popup 同元素上 */
+.menu-popup.el-zoom-in-left-enter-active,
+.menu-popup.el-zoom-in-left-leave-active {
+  //transition-duration: 0.1s !important;
+  transition-duration: 0.25s !important;
+}
+
+/* 弹窗菜单项 */
+.menu-popup .el-menu-item {
+  height: 38px;
+  line-height: 38px;
+  margin: 2px 8px;
+  padding: 0 12px !important;
+  font-size: 14px;
+  color: hsl(240 6% 10% / 75%);
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.menu-popup .el-menu-item:hover {
+  color: hsl(240 6% 10%);
+  background: hsl(240 5% 96%);
+}
+.menu-popup .el-menu-item.is-active {
+  color: hsl(212 100% 45%);
+  background: hsl(212 100% 45% / 12%);
+}
+
+/* 弹窗图标 */
+.menu-popup .el-icon {
+  font-size: 16px;
+  transition: transform 0.25s;
+}
+.menu-popup .el-menu-item:hover .el-icon {
+  transform: scale(1.2);
 }
 </style>

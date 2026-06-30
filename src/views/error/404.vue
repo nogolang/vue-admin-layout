@@ -12,7 +12,7 @@ defineOptions({ name: 'NotFoundView' })
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .error-page {
   display: flex;
   flex-direction: column;

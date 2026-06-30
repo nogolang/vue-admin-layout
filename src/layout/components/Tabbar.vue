@@ -198,59 +198,46 @@ const currentAffix = () => {
   </div>
 </template>
 
-<style scoped>
-/**
- * 标签栏外层
- * flex-shrink: 0 → 不参与滚动，始终固定在内容区顶部
- */
+<style lang="scss" scoped>
+// 标签栏外层（flex-shrink: 0 → 不参与滚动，始终固定在内容区顶部）
 .tabbar-wrap {
   flex-shrink: 0;
   background: var(--header-bg, #fff);
 }
 
-/*
- * el-tabs 高度变量（vben 默认 38px，这里用 34px 更紧凑）
- * 调整这个值 → 整体标签高度同步变化
- */
+// el-tabs 高度变量，改这个值 → 整体标签高度同步变化
 .tabbar-tabs {
   --el-tabs-header-height: 34px;
+
+  :deep(.el-tabs__header) {
+    margin: 0;
+    border-bottom: 1px solid var(--header-border, hsl(240 5.9% 90%));
+    background: var(--header-bg, #fff);
+  }
+
+  :deep(.el-tabs__nav) {
+    border: none;
+  }
+
+  // 单个标签：未激活浅灰，激活白底深字
+  :deep(.el-tabs__item) {
+    height: 34px;
+    line-height: 34px;
+    font-size: 12px;
+    padding: 0 12px;
+    border: none;
+    border-right: 1px solid var(--header-border, hsl(240 5.9% 90%));
+    color: hsl(240 4% 46%);
+    background: hsl(240 5% 96%);
+
+    &.is-active {
+      color: hsl(240 6% 10%);
+      background: #fff;
+    }
+  }
 }
 
-/* 标签头部容器 —— 底部边框 + 白色背景 */
-.tabbar-tabs :deep(.el-tabs__header) {
-  margin: 0;
-  border-bottom: 1px solid var(--header-border, hsl(240 5.9% 90%));
-  background: var(--header-bg, #fff);
-}
-
-/* 去除 el-tabs 默认的下划线导航条 */
-.tabbar-tabs :deep(.el-tabs__nav) {
-  border: none;
-}
-
-/*
- * 单个标签样式
- * 32px 高度、12px 字号、右侧分割线
- * 未激活：浅灰背景 hsl(240 5% 96%)
- * 激活态：白色背景 + 深色文字
- */
-.tabbar-tabs :deep(.el-tabs__item) {
-  height: 34px;
-  line-height: 34px;
-  font-size: 12px;
-  padding: 0 12px;
-  border: none;
-  border-right: 1px solid var(--header-border, hsl(240 5.9% 90%));
-  color: hsl(240 4% 46%);
-  background: hsl(240 5% 96%);
-}
-
-.tabbar-tabs :deep(.el-tabs__item.is-active) {
-  color: hsl(240 6% 10%);
-  background: #fff;
-}
-
-/* 标签文字 —— 超长截断 + 禁止选中 */
+// 标签文字：超长截断 + 禁止选中
 .tab-label {
   display: inline-block;
   max-width: 120px;
@@ -260,10 +247,7 @@ const currentAffix = () => {
   user-select: none;
 }
 
-/*
- * 右键菜单 —— fixed 定位 + z-index 3000 确保在最上层
- * min-width / border-radius / box-shadow 与 vben 对齐
- */
+// 右键菜单：fixed 定位，z-index 3000 确保最上层
 .tab-context-menu {
   position: fixed;
   z-index: 3000;
@@ -274,16 +258,16 @@ const currentAffix = () => {
   padding: 4px 0;
 }
 
-/* 菜单项 —— hover 变灰底 */
+// 菜单项
 .context-item {
   padding: 6px 16px;
   font-size: 13px;
   color: hsl(240 6% 10%);
   cursor: pointer;
   transition: background 0.15s;
-}
 
-.context-item:hover {
-  background: hsl(240 5% 96%);
+  &:hover {
+    background: hsl(240 5% 96%);
+  }
 }
 </style>

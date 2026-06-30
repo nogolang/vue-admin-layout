@@ -11,7 +11,7 @@ defineOptions({ name: 'MonitorLogView' })
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .page-container h2 {
   margin-bottom: 0;
 }
