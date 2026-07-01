@@ -82,15 +82,38 @@ const activeTopMenuName = computed(() => {
   return menu?.name || ''
 })
 
+const extraMenuRef = ref<any>(null)
+
 function syncActiveTopMenu() {
   const top = findTopMenu(route.path)
   if (top) activeTopMenu.value = top
 }
 
-watch(() => permissionStore.isRoutesLoaded, (loaded) => {
-  if (loaded) syncActiveTopMenu()
+function openExtraSubmenus() {
+  nextTick(() => {
+    for (const child of extraMenus.value) {
+      if (child.children?.some((gc) => route.path.startsWith(gc.path))) {
+        extraMenuRef.value?.open(child.path)
+      }
+    }
+  })
+}
+
+onMounted(() => {
+  syncActiveTopMenu()
+  openExtraSubmenus()
 })
-watch(() => route.path, () => syncActiveTopMenu())
+
+watch(() => permissionStore.isRoutesLoaded, (loaded) => {
+  if (loaded) {
+    syncActiveTopMenu()
+    openExtraSubmenus()
+  }
+})
+watch(() => route.path, () => {
+  syncActiveTopMenu()
+  openExtraSubmenus()
+})
 
 function handleTopMenuClick(menu: MenuItem) {
   activeTopMenu.value = menu.path
@@ -219,6 +242,7 @@ function handleTopMenuClick(menu: MenuItem) {
           <div class="extra-title-bar">{{ activeTopMenuName }}</div>
           <div class="extra-menu-wrap">
             <el-menu
+              ref="extraMenuRef"
               :default-active="route.path"
               router
               class="extra-el-menu menu-override"
