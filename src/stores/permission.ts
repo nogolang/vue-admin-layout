@@ -3,9 +3,8 @@ import { computed, ref } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 import router from '@/router'
 import type { MenuItem } from '@/router/menus'
-import { staticMenus } from '@/router/menus'
+import { dynamicMenuList, staticMenus } from '@/router/menus'
 import { menusToRoutes } from '@/router/routes'
-import { fetchMenus } from '@/api/menu'
 
 /**
  * 权限 / 动态路由状态管理
@@ -34,8 +33,8 @@ export const usePermissionStore = defineStore('permission', () => {
   async function generateRoutes() {
     if (isRoutesLoaded.value) return
 
-    // 从后端获取菜单数据
-    const menus = await fetchMenus()
+    // 当前使用前端硬编码菜单，接入后端后替换为: const menus = await fetchMenus()
+    const menus = dynamicMenuList
     dynamicMenus.value = menus
 
     // 菜单 → 路由配置 → 注册到 Root 路由下

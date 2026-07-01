@@ -11,8 +11,8 @@ export type LayoutType = 'sidebar-nav' | 'sidebar-mixed-nav'
  * sidebarCollapsed  垂直布局下侧边栏是否折叠
  */
 export const useLayoutStore = defineStore('layout', () => {
-  // 当前布局模式，默认垂直侧边栏
-  const layout = ref<LayoutType>('sidebar-nav')
+  // 当前布局模式，默认双列侧边栏
+  const layout = ref<LayoutType>('sidebar-mixed-nav')
   // 侧边栏折叠状态（仅 sidebar-nav 模式生效）
   const sidebarCollapsed = ref(false)
 

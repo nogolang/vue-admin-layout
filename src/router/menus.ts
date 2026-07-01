@@ -27,3 +27,34 @@ export const staticMenus: MenuItem[] = [
     component: '/dashboard',
   },
 ]
+
+/** 动态菜单（前端硬编码，接入后端后替换为 fetchMenus()） */
+export const dynamicMenuList: MenuItem[] = [
+  {
+    path: '/system',
+    name: 'System',
+    icon: 'Setting',
+    children: [
+      {
+        path: '/system/user',
+        name: 'User',
+        icon: 'User',
+        component: '/system/user',
+        children: [
+          { path: '/system/user/list', name: 'UserList', icon: 'User', component: '/system/user' },
+          { path: '/system/user/detail', name: 'UserDetail', icon: 'Document', component: '/system/user-detail' },
+        ],
+      },
+      { path: '/system/role', name: 'Role', icon: 'Avatar', component: '/system/role' },
+    ],
+  },
+  {
+    path: '/monitor',
+    name: 'Monitor',
+    icon: 'Monitor',
+    children: [
+      { path: '/monitor/online', name: 'Online', icon: 'Connection', component: '/monitor/online' },
+      { path: '/monitor/log', name: 'Log', icon: 'Document', component: '/monitor/log' },
+    ],
+  },
+]
