@@ -25,10 +25,8 @@ const router = useRouter()
 const layoutStore = useLayoutStore()
 const permissionStore = usePermissionStore()
 
-// 合并后的完整菜单（静态 + 动态），响应式
 const menuList = computed(() => permissionStore.allMenus)
 
-// icon 名称 → 组件映射
 const iconMap: Record<string, any> = {
   Odometer,
   Setting,
@@ -42,13 +40,10 @@ const iconMap: Record<string, any> = {
 // ==================== 垂直侧边栏逻辑 ====================
 const menuRef = ref<any>(null)
 
-/** 根据当前路径 + 已加载菜单，展开对应的父级 sub-menu */
 function openActiveSubmenus() {
   const path = route.path
   const menus = menuList.value
   if (!menus.length) return
-
-  // nextTick 确保 el-menu DOM 已就绪（动态路由加载后菜单才渲染）
   nextTick(() => {
     for (const menu of menus) {
       if (menu.children?.some((c) => path.startsWith(c.path))) {
@@ -58,23 +53,15 @@ function openActiveSubmenus() {
   })
 }
 
-// DOM 挂载后首次打开
 onMounted(() => openActiveSubmenus())
-
-// 路由变化时重新展开
 watch(() => route.path, () => openActiveSubmenus())
-
-// 动态路由加载完成后重新展开（此时 menuList 才包含完整数据）
 watch(() => permissionStore.isRoutesLoaded, (loaded) => {
   if (loaded) openActiveSubmenus()
 })
 
 // ==================== 双列侧边栏逻辑 ====================
-
-// 当前激活的顶级菜单路径
 const activeTopMenu = ref('')
 
-/** 根据路径查找所属顶级菜单 */
 function findTopMenu(path: string): string {
   for (const menu of menuList.value) {
     if (menu.path === path) return menu.path
@@ -83,86 +70,71 @@ function findTopMenu(path: string): string {
   return ''
 }
 
-// 第二列要显示的子菜单
 const extraMenus = computed(() => {
   const menu = menuList.value.find((m) => m.path === activeTopMenu.value)
   return menu?.children || []
 })
 
-// 是否显示第二列（有子菜单才显示）
 const showExtra = computed(() => extraMenus.value.length > 0)
 
-// 第二列标题（当前激活的顶级菜单名）
 const activeTopMenuName = computed(() => {
   const menu = menuList.value.find((m) => m.path === activeTopMenu.value)
   return menu?.name || ''
 })
 
-/** 同步顶级菜单激活状态 */
 function syncActiveTopMenu() {
   const top = findTopMenu(route.path)
   if (top) activeTopMenu.value = top
 }
 
-// 动态路由加载完成后同步（此时 menuList 才有完整数据）
 watch(() => permissionStore.isRoutesLoaded, (loaded) => {
   if (loaded) syncActiveTopMenu()
 })
-
-// 路由变化时同步
 watch(() => route.path, () => syncActiveTopMenu())
 
-/** 点击第一列图标：
- *  - 无子菜单 → 直接导航
- *  - 有子菜单 → 展开第二列，并导航到第一个子项 */
 function handleTopMenuClick(menu: MenuItem) {
   activeTopMenu.value = menu.path
   if (!menu.children?.length) {
     router.push(menu.path)
   } else {
     const firstChild = extraMenus.value[0]
-    if (firstChild) {
-      router.push(firstChild.path)
-    }
+    if (firstChild) router.push(firstChild.path)
   }
 }
 </script>
 
 <template>
-  <!--
-    外层容器 CSS 类：
-    layout-sidebar-nav         → 垂直侧边栏模式
-    layout-sidebar-mixed-nav   → 双列侧边栏模式
-  -->
   <div class="admin-layout" :class="`layout-${layoutStore.layout}`">
     <!-- ==================== 顶部 Header ==================== -->
     <header class="admin-header">
-      <!-- Logo 区域 —— 宽度随布局模式变化 -->
       <div class="header-logo">
+        <div class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="hsl(var(--primary))" />
+            <path d="M8 22V10l8 6-8 6zM16 22V10l8 6-8 6z" fill="white" opacity="0.9" />
+          </svg>
+        </div>
         <span class="logo-text">Vue Admin</span>
       </div>
 
-      <!-- 中间占位 -->
       <div class="header-center" />
 
-      <!-- 右侧操作区：布局切换 + 用户下拉 -->
       <div class="header-actions">
-        <el-radio-group
-          v-model="layoutStore.layout"
-          size="small"
-        >
-          <el-radio-button value="sidebar-nav">Vertical</el-radio-button>
-          <el-radio-button value="sidebar-mixed-nav">Two-Column</el-radio-button>
+        <el-radio-group v-model="layoutStore.layout" size="small" class="layout-switch">
+          <el-radio-button value="sidebar-nav">侧边栏</el-radio-button>
+          <el-radio-button value="sidebar-mixed-nav">双列</el-radio-button>
         </el-radio-group>
+
         <el-dropdown class="header-user" trigger="click">
           <span class="user-info">
-            Admin
+            <el-avatar :size="28" icon="UserFilled" />
+            <span class="user-name">Admin</span>
             <el-icon :size="14"><ArrowDown /></el-icon>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item>Profile</el-dropdown-item>
-              <el-dropdown-item>Logout</el-dropdown-item>
+              <el-dropdown-item>个人中心</el-dropdown-item>
+              <el-dropdown-item divided>退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -176,14 +148,7 @@ function handleTopMenuClick(menu: MenuItem) {
         class="sidebar-nav"
         :class="{ collapsed: layoutStore.sidebarCollapsed }"
       >
-        <!-- 菜单滚动区 -->
         <div class="sidebar-nav-inner">
-          <!--
-            el-menu 配置说明：
-            router            点击 menu-item 自动调用 router.push(index)
-            default-active    根据当前路径高亮对应菜单项
-            collapse          折叠模式（仅显示图标）
-          -->
           <el-menu
             ref="menuRef"
             :default-active="route.path"
@@ -193,7 +158,6 @@ function handleTopMenuClick(menu: MenuItem) {
             popper-class="menu-popup"
           >
             <template v-for="item in menuList" :key="item.path">
-              <!-- 有子菜单 → el-sub-menu -->
               <el-sub-menu
                 v-if="item.children?.length"
                 :index="item.path"
@@ -216,7 +180,6 @@ function handleTopMenuClick(menu: MenuItem) {
                   </div>
                 </el-menu-item>
               </el-sub-menu>
-              <!-- 无子菜单 → 直接渲染为 menu-item -->
               <el-menu-item v-else :index="item.path">
                 <div class="menu-title-wrap">
                   <el-icon><component :is="iconMap[item.icon]" /></el-icon>
@@ -226,7 +189,6 @@ function handleTopMenuClick(menu: MenuItem) {
             </template>
           </el-menu>
         </div>
-        <!-- 底部折叠按钮 -->
         <div class="sidebar-collapse-trigger" @click="layoutStore.toggleSidebar()">
           <el-icon :size="16">
             <Fold v-if="!layoutStore.sidebarCollapsed" />
@@ -237,7 +199,6 @@ function handleTopMenuClick(menu: MenuItem) {
 
       <!-- ==================== 双列侧边栏 ==================== -->
       <template v-if="layoutStore.isSidebarMixedNav">
-        <!-- 第一列：顶级菜单图标（80px 窄列） -->
         <aside class="sidebar-mixed">
           <div class="mixed-menu-list">
             <div
@@ -254,7 +215,6 @@ function handleTopMenuClick(menu: MenuItem) {
             </div>
           </div>
         </aside>
-        <!-- 第二列：当前顶级菜单的子菜单（224px） -->
         <aside v-if="showExtra" class="sidebar-extra">
           <div class="extra-title-bar">{{ activeTopMenuName }}</div>
           <div class="extra-menu-wrap">
@@ -300,7 +260,6 @@ function handleTopMenuClick(menu: MenuItem) {
 
       <!-- ==================== 主内容区 ==================== -->
       <main class="admin-main">
-        <!-- 多标签页 —— 位于内容区顶部，不横跨侧边栏 -->
         <LayoutTabbar />
         <div class="admin-content">
           <RouterView />
@@ -317,9 +276,8 @@ function handleTopMenuClick(menu: MenuItem) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: hsl(var(--background));
 }
-
-
 
 /* ==================== Header ==================== */
 .admin-header {
@@ -328,34 +286,40 @@ function handleTopMenuClick(menu: MenuItem) {
   display: flex;
   align-items: center;
   padding: 0 16px;
-  background: var(--header-bg);
-  border-bottom: 1px solid var(--header-border);
-  z-index: 200;
+  background: hsl(var(--header));
+  border-bottom: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-header);
+  z-index: var(--z-header);
 }
 
-/* Logo 区宽度跟随侧边栏宽度 */
+/* Logo 区 */
 .header-logo {
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  gap: 10px;
   min-width: var(--sidebar-width);
   padding-left: 8px;
-  transition: min-width 0.15s;
+  transition: min-width 0.2s ease;
 }
 
-/* 双列模式时 Logo 区收窄 */
 .layout-sidebar-mixed-nav .header-logo {
   min-width: var(--sidebar-mixed-width);
   justify-content: center;
   padding-left: 0;
 }
 
+.logo-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .logo-text {
   font-size: 18px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: hsl(var(--foreground));
   white-space: nowrap;
-  overflow: hidden;
   letter-spacing: -0.3px;
 }
 
@@ -370,24 +334,35 @@ function handleTopMenuClick(menu: MenuItem) {
   flex-shrink: 0;
 }
 
+.layout-switch {
+  :deep(.el-radio-button__inner) {
+    font-size: 12px;
+    padding: 4px 12px;
+  }
+}
+
 .header-user {
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
 .user-info {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
-  color: $color-text-primary;
-  font-size: 14px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background 0.15s;
+  padding: 2px 8px 2px 2px;
+  border-radius: 999px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: hsl(var(--accent));
+  }
 }
 
-.user-info:hover {
-  background: $color-bg-hover;
+.user-name {
+  font-size: 14px;
+  color: hsl(var(--foreground));
+  user-select: none;
 }
 
 /* ==================== Body ==================== */
@@ -403,8 +378,9 @@ function handleTopMenuClick(menu: MenuItem) {
   width: var(--sidebar-width);
   display: flex;
   flex-direction: column;
-  background: var(--sidebar-bg);
-  transition: width 0.2s;
+  background: hsl(var(--sidebar));
+  border-right: 1px solid hsl(var(--border));
+  transition: width 0.25s ease;
   overflow: hidden;
 }
 
@@ -419,71 +395,81 @@ function handleTopMenuClick(menu: MenuItem) {
   padding: 8px 0;
 }
 
-/* 底部折叠按钮 —— 固定高度 42px */
 .sidebar-collapse-trigger {
   height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--sidebar-collapse-text);
-  border-top: 1px solid var(--sidebar-border);
-  transition: color 0.15s;
+  color: hsl(var(--muted-foreground));
+  border-top: 1px solid hsl(var(--border));
+  transition: color 0.2s, background 0.2s;
   flex-shrink: 0;
+
+  &:hover {
+    color: hsl(var(--primary));
+    background: hsl(var(--accent));
+  }
 }
 
-.sidebar-collapse-trigger:hover {
-  color: var(--sidebar-text-hover);
-}
-
-/* ========== 菜单覆盖（.menu-override 挂在 sidebar-el-menu 和 extra-el-menu 上） ========== */
+/* ========== 菜单覆盖 ========== */
 .menu-override {
   border-right: none !important;
   background: transparent !important;
 
-  // ---- 菜单项 ----
   :deep(.el-menu-item) {
     height: var(--menu-item-height);
     line-height: var(--menu-item-height);
     margin: var(--menu-item-margin-y) var(--menu-item-margin-x);
     padding: 0 12px !important;
     font-size: var(--menu-font-size);
-    color: var(--sidebar-text);
+    color: hsl(var(--foreground) / 0.75);
     border-radius: var(--menu-item-radius);
-    transition: background 0.15s, color 0.15s;
+    transition: all 0.2s ease;
 
     &:hover {
-      color: var(--sidebar-text-hover);
-      background: var(--sidebar-hover-bg) !important;
+      color: hsl(var(--foreground));
+      background: hsl(var(--accent)) !important;
     }
     &.is-active {
-      color: var(--sidebar-active-text);
-      background: var(--sidebar-active-bg) !important;
+      color: hsl(var(--primary));
+      background: hsl(var(--primary) / 0.1) !important;
+      font-weight: 500;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 16px;
+        background: hsl(var(--primary));
+        border-radius: 0 3px 3px 0;
+      }
     }
   }
 
-  // ---- sub-menu 标题 ----
   :deep(.el-sub-menu__title) {
     height: var(--menu-item-height);
     line-height: var(--menu-item-height);
     margin: var(--menu-item-margin-y) var(--menu-item-margin-x);
     padding: 0 12px !important;
     font-size: var(--menu-font-size);
-    color: var(--sidebar-text);
+    color: hsl(var(--foreground) / 0.75);
     border-radius: var(--menu-item-radius);
-    transition: background 0.15s, color 0.15s;
+    transition: all 0.2s ease;
 
     &:hover {
-      color: var(--sidebar-text-hover);
-      background: var(--sidebar-hover-bg) !important;
+      color: hsl(var(--foreground));
+      background: hsl(var(--accent)) !important;
     }
   }
   :deep(.el-sub-menu.is-active > .el-sub-menu__title),
   :deep(.el-sub-menu.is-opened > .el-sub-menu__title) {
-    color: var(--sidebar-active-text);
+    color: hsl(var(--primary));
   }
 
-  // ---- 子菜单缩进 ----
   :deep(.el-sub-menu .el-menu-item) {
     padding-left: 44px !important;
   }
@@ -491,32 +477,38 @@ function handleTopMenuClick(menu: MenuItem) {
     padding-left: 60px !important;
   }
 
-  // ---- 展开箭头 ----
   :deep(.el-sub-menu__icon-arrow) {
-    color: var(--sidebar-arrow);
+    color: hsl(var(--muted-foreground));
     transition: transform 0.25s;
   }
 
-  // ---- 图标 ----
   :deep(.el-menu-item .el-icon),
   :deep(.el-sub-menu__title .el-icon) {
     font-size: var(--menu-icon-size);
     transition: transform 0.25s;
     flex-shrink: 0;
+    opacity: 0.7;
+  }
+  :deep(.el-menu-item.is-active .el-icon),
+  :deep(.el-sub-menu.is-opened > .el-sub-menu__title .el-icon) {
+    opacity: 1;
   }
   :deep(.el-menu-item:hover .el-icon),
   :deep(.el-sub-menu__title:hover .el-icon) {
-    transform: scale(1.2);
+    transform: scale(1.15);
+    opacity: 1;
   }
 }
 
-// ---- 折叠模式（仅 sidebar-el-menu） ----
 .sidebar-el-menu {
   :deep(.el-menu--collapse) {
     .el-menu-item,
     .el-sub-menu__title {
       justify-content: center;
       padding: 0 !important;
+    }
+    .el-menu-item.is-active::before {
+      display: none;
     }
   }
 }
@@ -535,42 +527,53 @@ function handleTopMenuClick(menu: MenuItem) {
   width: var(--sidebar-mixed-width);
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--sidebar-deep-bg);
-  border-right: 1px solid var(--sidebar-border);
+  background: hsl(var(--sidebar-deep));
+  border-right: 1px solid hsl(var(--border));
 }
 
 .mixed-menu-list {
   padding: 8px 0;
 }
 
-/* 图标项：图标在上、文字在下，垂直居中 */
 .mixed-menu-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 52px;
-  margin: 4px 0;
-  color: var(--sidebar-text-muted);
+  height: 56px;
+  margin: 4px 8px;
+  color: hsl(var(--muted-foreground));
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
+  border-radius: var(--menu-item-radius);
+  transition: all 0.2s ease;
+  position: relative;
 
-.mixed-menu-item:hover {
-  color: var(--sidebar-text-hover);
-  background: var(--sidebar-hover-bg);
-}
-
-.mixed-menu-item {
-  &:hover :deep(.el-icon) {
-    transform: scale(1.2);
-  }
-  &.active {
-    color: var(--sidebar-active-text);
-    background: var(--sidebar-active-bg);
-  }
   :deep(.el-icon) {
-    transition: transform 0.25s;
+    transition: transform 0.25s, opacity 0.2s;
+    opacity: 0.65;
+  }
+
+  &:hover {
+    color: hsl(var(--foreground));
+    background: hsl(var(--accent));
+
+    :deep(.el-icon) {
+      transform: scale(1.15);
+      opacity: 1;
+    }
+  }
+
+  &.active {
+    color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.1);
+
+    :deep(.el-icon) {
+      opacity: 1;
+    }
+
+    .mixed-menu-label {
+      font-weight: 500;
+    }
   }
 }
 
@@ -591,19 +594,18 @@ function handleTopMenuClick(menu: MenuItem) {
   width: var(--sidebar-extra-width);
   display: flex;
   flex-direction: column;
-  background: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
+  background: hsl(var(--sidebar));
+  border-right: 1px solid hsl(var(--border));
 }
 
-/* 标题栏：49px = header-height - 1 */
 .extra-title-bar {
   height: 49px;
   line-height: 49px;
   padding: 0 16px;
   font-size: 15px;
   font-weight: 600;
-  color: var(--sidebar-text-hover);
-  border-bottom: 1px solid var(--sidebar-border);
+  color: hsl(var(--foreground));
+  border-bottom: 1px solid hsl(var(--border));
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -622,10 +624,9 @@ function handleTopMenuClick(menu: MenuItem) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--content-bg);
+  background: hsl(var(--background-deep));
 }
 
-/* 内容滚动区（标签页下方） */
 .admin-content {
   flex: 1;
   overflow-y: auto;
@@ -634,28 +635,20 @@ function handleTopMenuClick(menu: MenuItem) {
 </style>
 
 <style lang="scss">
-/*
- * el-menu 折叠弹出菜单（不能 scoped —— el-popper 被 Teleport 到 body）
- *
- * DOM：<div class="el-popper el-tooltip menu-popup">
- *        <div class="el-menu--popup-container menu-popup">
- *          <ul class="el-menu el-menu--popup">
- *            <li class="el-menu-item">...</li>
- *          </ul>
- *        </div>
- *      </div>
- */
+/* el-menu 折叠弹出菜单（不能 scoped —— el-popper 被 Teleport 到 body） */
 .menu-popup {
-  border-radius: 15px !important;
+  border-radius: var(--radius) !important;
   overflow: hidden;
+  box-shadow: var(--shadow-popover) !important;
 
   .el-menu--popup {
-    background: var(--sidebar-bg) !important;
+    background: hsl(var(--sidebar)) !important;
+    padding: 4px 0;
   }
 
   &.el-zoom-in-left-enter-active,
   &.el-zoom-in-left-leave-active {
-    transition-duration: 0.25s !important;
+    transition-duration: 0.2s !important;
   }
 
   .el-menu-item {
@@ -664,26 +657,30 @@ function handleTopMenuClick(menu: MenuItem) {
     margin: 2px 8px;
     padding: 0 12px !important;
     font-size: 14px;
-    color: var(--sidebar-text);
+    color: hsl(var(--foreground) / 0.75);
     border-radius: 6px;
-    transition: background 0.15s, color 0.15s;
+    transition: all 0.15s ease;
 
     &:hover {
-      color: var(--sidebar-text-hover);
-      background: var(--sidebar-hover-bg);
+      color: hsl(var(--foreground));
+      background: hsl(var(--accent));
     }
     &.is-active {
-      color: var(--sidebar-active-text);
-      background: var(--sidebar-active-bg);
+      color: hsl(var(--primary));
+      background: hsl(var(--primary) / 0.1);
+      font-weight: 500;
     }
   }
 
   .el-icon {
     font-size: 16px;
     transition: transform 0.25s;
+    opacity: 0.7;
   }
-  .el-menu-item:hover .el-icon {
-    transform: scale(1.2);
+  .el-menu-item:hover .el-icon,
+  .el-menu-item.is-active .el-icon {
+    transform: scale(1.15);
+    opacity: 1;
   }
 }
 

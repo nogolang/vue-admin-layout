@@ -1,23 +1,35 @@
 // ==================== 全局 SCSS 变量 ====================
 // 通过 vite additionalData 自动注入所有 <style lang="scss">
-// 用法：直接写 $color-primary，不需要 @use
+// 使用 HSL 函数引用设计令牌，与 main.css 保持一致
 
 // 主色
 $color-primary: hsl(212 100% 45%);
-$color-primary-light: hsl(212 100% 45% / 12%);
+$color-primary-active: hsl(212 100% 45% / 12%);
+
+// 语义色
+$color-success: hsl(144 57% 58%);
+$color-warning: hsl(42 84% 61%);
+$color-danger: hsl(359.33 100% 65.1%);
 
 // 文字
-$color-text-primary: hsl(240 6% 10%);
-$color-text-secondary: hsl(240 6% 10% / 75%);
-$color-text-muted: hsl(240 4% 46%);
+$color-text-primary: hsl(210 6% 21%);       // --foreground
+$color-text-secondary: hsl(210 6% 21% / 75%);
+$color-text-muted: hsl(240 3.8% 46.1%);     // --muted-foreground
 
 // 背景
-$color-bg-hover: hsl(240 5% 96%);
-$color-bg-content: hsl(216 20.11% 95.47%);
+$color-bg-page: hsl(0 0% 100%);             // --background
+$color-bg-content: hsl(216 20.11% 95.47%);  // --background-deep
+$color-bg-hover: hsl(240 5% 96%);           // --accent
+$color-bg-container: hsl(0 0% 100%);        // --card
 
 // 边框
-$color-border: hsl(240 5.9% 90%);
+$color-border: hsl(240 5.9% 90%);           // --border
+$color-border-light: hsl(240 5.9% 90% / 50%);
 
-// 侧边栏
-$color-sidebar-bg: #fff;
-$color-sidebar-deep-bg: #f5f6f8;
+// 侧边栏别名（方便布局组件使用）
+$color-sidebar-bg: hsl(0 0% 100%);          // --sidebar
+$color-sidebar-deep-bg: hsl(216 20.11% 95.47%); // --sidebar-deep
+
+// 阴影
+$shadow-float: 0 6px 16px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%);
+$shadow-header: 0 1px 4px rgb(0 0 0 / 8%);

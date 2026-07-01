@@ -9,18 +9,12 @@ const route = useRoute()
 const router = useRouter()
 const tabbarStore = useTabbarStore()
 
-/**
- * 监听路由变化，自动添加标签页
- * hidden 页面（404 / login）不添加到标签栏
- * oldFullPath 为 undefined 表示首次加载（含刷新），补加当前路由
- */
 watch(
   () => route.fullPath,
   (_fullPath, oldFullPath) => {
     if (!route.meta?.hidden) {
       tabbarStore.addTab(route)
     }
-    // 刷新页面时首次触发，oldFullPath 为 undefined，此时补一条
     if (!oldFullPath) {
       tabbarStore.addTab(route)
     }
@@ -28,27 +22,16 @@ watch(
   { immediate: true },
 )
 
-/** 点击标签 → 导航到对应页面 */
 function handleTabClick(key: string) {
   const tab = tabbarStore.tabs.find((t) => t.key === key)
-  if (tab) {
-    router.push(tab.fullPath)
-  }
+  if (tab) router.push(tab.fullPath)
 }
 
-/**
- * 关闭标签
- * - affix（固定标签，如 Dashboard）不允许关闭
- * - 若关闭的是当前标签，跳转到相邻标签
- */
 function handleTabRemove(key: string) {
   const tab = tabbarStore.tabs.find((t) => t.key === key)
   if (!tab || tab.affix) return
-
   const idx = tabbarStore.tabs.indexOf(tab)
   tabbarStore.closeTab(key)
-
-  // 关闭的是当前标签 → 跳转到最近的标签
   if (key === tabbarStore.activeKey) {
     const remaining = tabbarStore.tabs
     if (remaining.length === 0) return
@@ -58,16 +41,13 @@ function handleTabRemove(key: string) {
 }
 
 // ==================== 右键菜单 ====================
-
-/** 右键菜单状态 */
 const contextMenu = reactive({
-  visible: false, // 是否显示
-  x: 0,           // 鼠标 clientX
-  y: 0,           // 鼠标 clientY
-  tabKey: '',     // 右键点击的标签 key
+  visible: false,
+  x: 0,
+  y: 0,
+  tabKey: '',
 })
 
-/** 右键打开菜单 */
 function handleContextMenu(e: MouseEvent, key: string) {
   e.preventDefault()
   e.stopPropagation()
@@ -81,7 +61,6 @@ function hideContextMenu() {
   contextMenu.visible = false
 }
 
-/** 点击页面其他地方自动关闭右键菜单 */
 function onGlobalClick() {
   hideContextMenu()
 }
@@ -94,7 +73,6 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', onGlobalClick)
 })
 
-/** 处理右键菜单操作 */
 function onContextAction(action: string) {
   const key = contextMenu.tabKey
   switch (action) {
@@ -118,7 +96,6 @@ function onContextAction(action: string) {
   hideContextMenu()
 }
 
-/** 右键的标签是否是固定标签（affix 标签不显示"关闭当前"） */
 const currentAffix = () => {
   const tab = tabbarStore.tabs.find((t) => t.key === contextMenu.tabKey)
   return tab?.affix ?? true
@@ -126,12 +103,6 @@ const currentAffix = () => {
 </script>
 
 <template>
-  <!--
-    标签栏容器
-    el-tabs type="card" → 卡片风格标签
-    closable → 显示关闭按钮
-    model-value 绑定当前路由 fullPath → 激活对应标签
-  -->
   <div class="tabbar-wrap">
     <el-tabs
       :model-value="route.fullPath"
@@ -141,10 +112,6 @@ const currentAffix = () => {
       @tab-click="(tab: any) => handleTabClick(tab.props.name as string)"
       @tab-remove="handleTabRemove"
     >
-      <!--
-        遍历 sortedTabs：固定标签（Dashboard）始终在前
-        affix 标签不可关闭（closable 为 false）
-      -->
       <el-tab-pane
         v-for="tab in tabbarStore.sortedTabs"
         :key="tab.key"
@@ -152,7 +119,6 @@ const currentAffix = () => {
         :closable="!tab.affix"
       >
         <template #label>
-          <!-- 标签文字区域 —— 绑定右键事件 -->
           <span
             class="tab-label"
             @contextmenu="handleContextMenu($event, tab.key)"
@@ -163,17 +129,12 @@ const currentAffix = () => {
       </el-tab-pane>
     </el-tabs>
 
-    <!--
-      右键菜单 —— Teleport 到 body 防止被 overflow: hidden 裁剪
-      菜单位置跟随鼠标 clientX / clientY
-    -->
     <Teleport to="body">
       <div
         v-if="contextMenu.visible"
         class="tab-context-menu"
         :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
       >
-        <!-- affix 标签（Dashboard）不显示"关闭当前" -->
         <div
           v-if="!currentAffix()"
           class="context-item"
@@ -190,7 +151,7 @@ const currentAffix = () => {
         <div class="context-item" @click="onContextAction('close-right')">
           关闭右侧
         </div>
-        <div class="context-item" @click="onContextAction('close-all')">
+        <div class="context-item divider" @click="onContextAction('close-all')">
           关闭全部
         </div>
       </div>
@@ -199,45 +160,121 @@ const currentAffix = () => {
 </template>
 
 <style lang="scss" scoped>
-// 标签栏外层（flex-shrink: 0 → 不参与滚动，始终固定在内容区顶部）
 .tabbar-wrap {
   flex-shrink: 0;
-  background: var(--header-bg, #fff);
+  background: hsl(0 0% 100%);
+  padding: 0 8px;
 }
 
-// el-tabs 高度变量，改这个值 → 整体标签高度同步变化
 .tabbar-tabs {
-  --el-tabs-header-height: 34px;
+  --el-tabs-header-height: 36px;
 
   :deep(.el-tabs__header) {
     margin: 0;
-    border-bottom: 1px solid var(--header-border, hsl(240 5.9% 90%));
-    background: var(--header-bg, #fff);
+    border-bottom: 1px solid hsl(var(--border));
+    background: transparent;
+  }
+
+  :deep(.el-tabs__nav-wrap) {
+    &::after {
+      display: none;
+    }
   }
 
   :deep(.el-tabs__nav) {
     border: none;
   }
 
-  // 单个标签：未激活浅灰，激活白底深字
-  :deep(.el-tabs__item) {
-    height: 34px;
-    line-height: 34px;
+  :deep(.el-tabs__nav-next),
+  :deep(.el-tabs__nav-prev) {
+    height: 36px;
+    line-height: 36px;
     font-size: 12px;
+  }
+
+  :deep(.el-tabs__item) {
+    height: 36px;
+    line-height: 36px;
+    font-size: 13px;
     padding: 0 12px;
-    border: none;
-    border-right: 1px solid var(--header-border, hsl(240 5.9% 90%));
-    color: $color-text-muted;
-    background: $color-bg-hover;
+    margin: 0 2px;
+    border: none !important;
+    border-radius: var(--radius) var(--radius) 0 0;
+    color: hsl(var(--muted-foreground));
+    background: transparent;
+    transition: all 0.2s ease;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 12px;
+      right: 12px;
+      height: 2px;
+      background: transparent;
+      border-radius: 1px 1px 0 0;
+      transition: background 0.2s ease;
+    }
+
+    &:hover {
+      color: hsl(var(--foreground));
+      background: hsl(var(--accent) / 0.5);
+
+      .el-tabs__close {
+        opacity: 0.7;
+      }
+    }
 
     &.is-active {
-      color: $color-text-primary;
-      background: #fff;
+      color: hsl(var(--primary));
+      background: transparent;
+      font-weight: 500;
+
+      &::after {
+        background: hsl(var(--primary));
+      }
+    }
+  }
+
+  // 关闭按钮
+  :deep(.el-tabs__close) {
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    color: hsl(var(--muted-foreground));
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s;
+    border-radius: 3px;
+    margin-left: 4px;
+
+    &:hover {
+      color: hsl(var(--foreground));
+      background: hsl(var(--accent));
+    }
+  }
+
+  :deep(.el-tabs__item:hover .el-tabs__close) {
+    opacity: 0.7;
+  }
+  :deep(.el-tabs__item.is-active .el-tabs__close) {
+    opacity: 0.7;
+  }
+
+  // 新标签按钮
+  :deep(.el-tabs__new-tab) {
+    margin: 0 4px;
+    height: 36px;
+    line-height: 36px;
+    color: hsl(var(--muted-foreground));
+    transition: color 0.15s;
+
+    &:hover {
+      color: hsl(var(--primary));
     }
   }
 }
 
-// 标签文字：超长截断 + 禁止选中
 .tab-label {
   display: inline-block;
   max-width: 120px;
@@ -247,27 +284,34 @@ const currentAffix = () => {
   user-select: none;
 }
 
-// 右键菜单：fixed 定位，z-index 3000 确保最上层
+// 右键菜单
 .tab-context-menu {
   position: fixed;
-  z-index: 3000;
-  min-width: 100px;
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  z-index: var(--z-popup);
+  min-width: 120px;
+  background: hsl(var(--popover));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-popover);
+  border: 1px solid hsl(var(--border));
   padding: 4px 0;
 }
 
-// 菜单项
 .context-item {
-  padding: 6px 16px;
+  padding: 8px 16px;
   font-size: 13px;
-  color: $color-text-primary;
+  color: hsl(var(--foreground));
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
 
   &:hover {
-    background: $color-bg-hover;
+    background: hsl(var(--accent));
+    color: hsl(var(--primary));
+  }
+
+  &.divider {
+    border-top: 1px solid hsl(var(--border));
+    margin-top: 4px;
+    padding-top: 12px;
   }
 }
 </style>

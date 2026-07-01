@@ -1,39 +1,104 @@
-/* ==================== 全局 CSS 变量 ==================== */
+/* ==================== 设计令牌（Design Tokens） ==================== */
+/* 参考 Vben Admin v5 的设计系统，采用 HSL 色彩空间 */
+
 :root {
-  /* 布局尺寸 */
+  /* ---- 基础 ---- */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-size-base: 14px;
+  --radius: 0.5rem;
+
+  /* ---- 页面背景 & 前景 ---- */
+  --background: 0 0% 100%;
+  --background-deep: 216 20.11% 95.47%;
+  --foreground: 210 6% 21%;
+
+  /* ---- 卡片 ---- */
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+
+  /* ---- 弹出层 ---- */
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+
+  /* ---- 主题色 ---- */
+  --primary: 212 100% 45%;
+  --primary-foreground: 0 0% 98%;
+
+  /* ---- 辅助色 ---- */
+  --secondary: 240 5% 96%;
+  --secondary-foreground: 240 6% 10%;
+
+  /* ---- 柔和背景 ---- */
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+
+  /* ---- 强调（hover / active 态） ---- */
+  --accent: 240 5% 96%;
+  --accent-dark: 216 14% 93%;
+  --accent-darker: 216 11% 91%;
+  --accent-lighter: 240 0% 98%;
+  --accent-hover: 200 10% 90%;
+  --accent-foreground: 240 6% 10%;
+
+  /* ---- 语义色 ---- */
+  --destructive: 359.33 100% 65.1%;
+  --destructive-foreground: 0 0% 98%;
+  --success: 144 57% 58%;
+  --success-foreground: 0 0% 98%;
+  --warning: 42 84% 61%;
+  --warning-foreground: 0 0% 98%;
+  --info: 240 5% 96%;
+  --info-foreground: 220 4% 58%;
+
+  /* ---- 边框 ---- */
+  --border: 240 5.9% 90%;
+  --input: 240 5.88% 90%;
+  --input-placeholder: 217 10.6% 65%;
+  --input-background: 0 0% 100%;
+
+  /* ---- 聚焦环 ---- */
+  --ring: 222.2 84% 4.9%;
+
+  /* ---- 遮罩 ---- */
+  --overlay: 0 0% 0% / 45%;
+  --overlay-content: 0 0% 95% / 45%;
+
+  /* ---- 阴影 ---- */
+  --shadow-float: 0 6px 16px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%);
+  --shadow-header: 0 1px 4px rgb(0 0 0 / 8%);
+  --shadow-sidebar: 0 4px 20px rgb(0 0 0 / 4%);
+  --shadow-popover: 0 4px 16px rgb(0 0 0 / 8%);
+
+  /* ---- z-index 层级 ---- */
+  --z-header: 200;
+  --z-sidebar: 100;
+  --z-popup: 3000;
+
+  /* ==================== 组件级令牌 ==================== */
+
+  /* 顶部 Header */
+  --header: 0 0% 100%;
   --header-height: 50px;
+
+  /* 侧边栏 */
+  --sidebar: 0 0% 100%;
+  --sidebar-deep: 216 20.11% 95.47%;
   --sidebar-width: 224px;
   --sidebar-collapse-width: 60px;
   --sidebar-mixed-width: 80px;
   --sidebar-extra-width: 224px;
 
-  /* 侧边栏 */
-  --sidebar-bg: #fff;
-  --sidebar-deep-bg: #f5f6f8;
-  --sidebar-text: hsl(240 6% 10% / 75%);
-  --sidebar-text-hover: hsl(240 6% 10%);
-  --sidebar-text-muted: hsl(240 4% 46%);
-  --sidebar-active-bg: hsl(212 100% 45% / 12%);
-  --sidebar-active-text: hsl(212 100% 45%);
-  --sidebar-hover-bg: hsl(240 5% 96%);
-  --sidebar-border: hsl(240 5.9% 90%);
-  --sidebar-arrow: hsl(240 4% 46%);
-  --sidebar-collapse-text: hsl(240 4% 46%);
-
-  /* 顶部 Header */
-  --header-bg: #fff;
-  --header-border: hsl(240 5.9% 90%);
-
-  /* 内容区 */
-  --content-bg: hsl(216 20.11% 95.47%);
-
   /* 菜单项 */
-  --menu-item-height: 38px;
-  --menu-item-margin-y: 2px;
-  --menu-item-margin-x: 8px;
-  --menu-item-radius: 8px;
+  --menu: var(--sidebar);
   --menu-font-size: 14px;
   --menu-icon-size: 16px;
+  --menu-item-height: 38px;
+  --menu-item-radius: 8px;
+  --menu-item-margin-y: 2px;
+  --menu-item-margin-x: 8px;
+
+  accent-color: hsl(var(--primary));
+  color-scheme: light;
 }
 
 /* ==================== 全局基础样式 ==================== */
@@ -48,20 +113,10 @@
 html,
 body {
   height: 100%;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Helvetica Neue',
-    sans-serif;
-  font-size: 14px;
-  color: hsl(240 6% 10%);
-  background: hsl(216 20.11% 95.47%);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -73,4 +128,63 @@ body {
 a {
   text-decoration: none;
   color: inherit;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Element Plus 全局覆盖 —— 使用设计令牌统一组件风格 */
+/* 输入框 */
+.el-input__wrapper,
+.el-textarea__inner,
+.el-select__wrapper {
+  border-radius: var(--radius) !important;
+}
+
+/* 按钮 */
+.el-button {
+  border-radius: var(--radius);
+}
+
+/* 卡片 */
+.el-card {
+  border-radius: var(--radius);
+}
+
+/* 下拉菜单 */
+.el-dropdown-menu {
+  border-radius: var(--radius);
+}
+
+/* 对话框 */
+.el-dialog {
+  border-radius: var(--radius);
+}
+
+/* 消息提示 */
+.el-message {
+  border-radius: var(--radius);
+}
+
+/* ========== 覆盖 Element Plus 全部字体变量（!important 防止被 EP :root 覆盖） ========== */
+:root {
+  --el-font-size-extra-large: 20px !important;
+  --el-font-size-large: 18px !important;
+  --el-font-size-medium: 16px !important;
+  --el-font-size-base: var(--font-size-base) !important;
+  --el-font-size-small: 13px !important;
+  --el-font-size-extra-small: 12px !important;
 }
