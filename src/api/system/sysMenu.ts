@@ -21,26 +21,47 @@ export type MenuType = 'button' | 'group' | 'page'
 
 /** 菜单实体 */
 export interface SysMenu {
+  /** 菜单 ID */
   id: number
+  /** 父菜单 ID（0 表示根级） */
   parentId: number
+  /** 菜单名称 */
   name: string
+  /** 路由路径 */
   path: string
+  /** 视图组件路径（对应 views 目录，仅 page 类型有效） */
   component?: string
+  /** 重定向路径 */
   redirect?: string
+  /** 路由 name */
   routeName?: string
+  /** 权限标识（仅 button 类型有效） */
   perm?: string
+  /** Element Plus 图标名 */
   icon?: string
+  /** 菜单类型：group=分组, page=页面, button=按钮 */
   type: MenuType
+  /** 排序（越小越靠前） */
   sort?: number
+  /** 状态：1=启用, 2=禁用 */
   status?: number
+  /** 是否缓存页面：1=是, 0=否 */
   keepAlive?: number
+  /** 菜单中隐藏：1=是, 0=否 */
   hideInMenu?: number
+  /** 标签页中隐藏：1=是, 0=否 */
   hideInTab?: number
+  /** 面包屑中隐藏：1=是, 0=否 */
   hideInBreadcrumb?: number
+  /** 隐藏子菜单：1=是, 0=否 */
   hideChildrenInMenu?: number
+  /** 不展示侧边栏：1=是, 0=否 */
   hideSidebar?: number
+  /** 固定标签页：1=是, 0=否 */
   affixTab?: number
+  /** 路由参数 */
   params?: string
+  /** 子菜单 */
   children?: SysMenu[]
   [key: string]: any
 }
@@ -52,24 +73,43 @@ export interface SysMenuQuery {
 
 /** 菜单创建/更新请求 */
 export interface SysMenuRequest {
+  /** 父菜单 ID */
   parentId: number
+  /** 菜单名称 */
   name: string
+  /** 路由路径 */
   path: string
+  /** 视图组件路径 */
   component?: string
+  /** 重定向路径 */
   redirect?: string
+  /** 路由 name */
   routeName?: string
+  /** 权限标识 */
   perm?: string
+  /** 图标名 */
   icon?: string
+  /** 菜单类型 */
   type: MenuType
+  /** 排序 */
   sort?: number
+  /** 状态 */
   status?: number
+  /** 是否缓存 */
   keepAlive?: number
+  /** 菜单中隐藏 */
   hideInMenu?: number
+  /** 标签页中隐藏 */
   hideInTab?: number
+  /** 面包屑中隐藏 */
   hideInBreadcrumb?: number
+  /** 隐藏子菜单 */
   hideChildrenInMenu?: number
+  /** 不展示侧边栏 */
   hideSidebar?: number
+  /** 固定标签页 */
   affixTab?: number
+  /** 路由参数 */
   params?: string
 }
 

@@ -20,36 +20,53 @@ import request from '@/api/index'
 
 /** API 接口实体 */
 export interface SysApi {
+  /** 接口 ID */
   id: number
+  /** 请求路径（如 /user/v1/list） */
   path: string
+  /** 请求方法（GET/POST/PUT/DELETE） */
   method: string
+  /** 接口描述 */
   description?: string
+  /** 所属分组 ID */
   groupId?: number
   [key: string]: any
 }
 
 /** API 接口创建/更新请求 */
 export interface SysApiRequest {
+  /** 请求路径 */
   path: string
+  /** 请求方法 */
   method: string
+  /** 接口描述 */
   description?: string
+  /** 所属分组 ID */
   groupId?: number
 }
 
 /** API 分组实体（含子接口） */
 export interface SysApiGroup {
+  /** 分组 ID */
   id: number
+  /** 分组名称 */
   name: string
+  /** 分组描述 */
   description?: string
+  /** 排序 */
   sort?: number
+  /** 分组下的接口列表 */
   apis?: SysApi[]
   [key: string]: any
 }
 
 /** API 分组创建/更新请求 */
 export interface SysApiGroupRequest {
+  /** 分组名称 */
   name: string
+  /** 分组描述 */
   description?: string
+  /** 排序 */
   sort?: number
 }
 

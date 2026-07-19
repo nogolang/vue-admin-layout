@@ -5,6 +5,9 @@ import { Plus, Edit, Delete, FolderAdd } from '@element-plus/icons-vue'
 import { getApiGroupList, deleteApi, deleteApiGroup } from '@/api/system/sysApi'
 import type { SysApi, SysApiGroup } from '@/api/system/sysApi'
 import SysApiEdit from './sysApiEdit.vue'
+import { useLocalStore } from '@/stores/useLocalStore'
+
+const localStore = useLocalStore<SysApi>('local_sysApi')
 
 // ==================== 类型定义 ====================
 
@@ -64,7 +67,19 @@ const findAll = async () => {
   loading.value = true
   try {
     const res: any = await getApiGroupList()
-    tableData.value = transformData(res?.data?.list || [])
+    const groups = transformData(res?.data?.list || [])
+    // 本地新增的接口直接追加到第一个分组，或作为独立分组
+    const localItems = localStore.load()
+    if (localItems.length && groups.length) {
+      groups[0].children.push(
+        ...localItems.map((item) => ({
+          ...item,
+          rowKey: `api-${item.id}`,
+          groupId: (item as any).groupId || groups[0].id,
+        } as ApiTableRow)),
+      )
+    }
+    tableData.value = groups
   } finally {
     loading.value = false
   }

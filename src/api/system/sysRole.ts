@@ -20,15 +20,25 @@ import request from '@/api/index'
 
 /** 角色实体 */
 export interface SysRole {
+  /** 角色 ID */
   id: number
+  /** 角色名称 */
   name: string
+  /** 父角色 ID */
   parentId?: number
+  /** 排序（越小越靠前） */
   sort?: number
+  /** 状态：1=启用, 2=禁用 */
   status?: number
+  /** 备注 */
   remark?: string
+  /** 登录后默认首页路径 */
   homePath?: string
+  /** 已分配的菜单 ID 列表 */
   menuIds?: number[]
+  /** 已分配的接口 ID 列表 */
   apiIds?: number[]
+  /** 子角色 */
   children?: SysRole[]
   [key: string]: any
 }
@@ -41,10 +51,15 @@ export interface SysRoleQuery {
 
 /** 角色创建/更新请求 */
 export interface SysRoleRequest {
+  /** 角色名称 */
   name: string
+  /** 父角色 ID */
   parentId?: number
+  /** 排序 */
   sort?: number
+  /** 状态 */
   status?: number
+  /** 备注 */
   remark?: string
 }
 

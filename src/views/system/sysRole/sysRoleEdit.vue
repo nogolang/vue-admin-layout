@@ -3,6 +3,9 @@ import { ref, computed, toRaw } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getRoleById, createRole, updateRole } from '@/api/system/sysRole'
 import type { SysRole } from '@/api/system/sysRole'
+import { useLocalStore } from '@/stores/useLocalStore'
+
+const localStore = useLocalStore<SysRole>('local_sysRole')
 
 // ==================== 对话框状态 ====================
 
@@ -106,6 +109,7 @@ const addForm = async () => {
     remark: form.value.remark || undefined,
   })
   ElMessage.success('角色创建成功')
+  localStore.add({ ...form.value, id: 0 })
   dialogVisible.value = false
   emit('afterSave')
 }

@@ -3,6 +3,9 @@ import { ref, computed, toRaw } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getMenuById, createMenu, updateMenu } from '@/api/system/sysMenu'
 import type { SysMenu, MenuType } from '@/api/system/sysMenu'
+import { useLocalStore } from '@/stores/useLocalStore'
+
+const localStore = useLocalStore<SysMenu>('local_sysMenu')
 
 // ==================== 对话框状态 ====================
 
@@ -116,6 +119,7 @@ const addForm = async () => {
     perm: form.value.perm || undefined,
   })
   ElMessage.success('菜单创建成功')
+  localStore.add({ ...form.value, id: 0 })
   dialogVisible.value = false
   emit('afterSave')
 }

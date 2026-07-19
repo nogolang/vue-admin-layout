@@ -12,6 +12,9 @@ import {
 } from '@/api/system/sysRole'
 import type { SysRole } from '@/api/system/sysRole'
 import SysRoleEdit from './sysRoleEdit.vue'
+import { useLocalStore } from '@/stores/useLocalStore'
+
+const localStore = useLocalStore<SysRole>('local_sysRole')
 
 // ==================== 角色列表数据 ====================
 
@@ -25,7 +28,10 @@ const findAll = async () => {
   loading.value = true
   try {
     const res: any = await getRoleTree()
-    tableData.value = res?.data || []
+    const tree: SysRole[] = res?.data || []
+    // 本地新增的角色直接追加到根级
+    tree.push(...localStore.load())
+    tableData.value = tree
   } finally {
     loading.value = false
   }

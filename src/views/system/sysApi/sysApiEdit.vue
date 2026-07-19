@@ -7,6 +7,10 @@ import {
   createApi,
   updateApi,
 } from '@/api/system/sysApi'
+import type { SysApi } from '@/api/system/sysApi'
+import { useLocalStore } from '@/stores/useLocalStore'
+
+const localStore = useLocalStore<SysApi>('local_sysApi')
 
 // ==================== 对话框状态 ====================
 
@@ -21,12 +25,13 @@ const nowGroupId = ref<number | undefined>(undefined)
 
 // 表单同时承载分组和接口两种类型的数据
 interface EditForm {
-  // 分组字段
+  /** 分组名称 */
   name: string
-  // 接口字段
+  /** 接口路径（api 模式） */
   path: string
+  /** 请求方法（api 模式） */
   method: string
-  // 通用字段
+  /** 描述 */
   description: string
 }
 
@@ -128,6 +133,7 @@ const addForm = async () => {
       groupId: nowGroupId.value,
     })
     ElMessage.success('接口创建成功')
+    localStore.add({ ...form.value, groupId: nowGroupId.value, id: 0 } as SysApi)
   }
 
   dialogVisible.value = false

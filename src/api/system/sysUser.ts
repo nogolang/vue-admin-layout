@@ -62,54 +62,90 @@ export async function fetchUserInfo(): Promise<UserInfoResult> {
 
 /** 用户实体 */
 export interface SysUser {
+  /** 用户 ID */
   id: number
+  /** 用户名（登录账号） */
   username: string
+  /** 昵称 */
   nickName?: string
+  /** 邮箱 */
   email?: string
+  /** 手机号 */
   phone?: string
+  /** 头像 URL */
   avatar?: string
+  /** 性别：1=男, 2=女 */
   gender?: number
+  /** 所属部门 ID */
   deptId?: number
+  /** 状态：1=启用, 2=禁用 */
   status?: number
+  /** 个人简介 */
   introduction?: string
+  /** 所属角色列表 */
   roles?: { id: number; name: string }[]
   [key: string]: any
 }
 
 /** 用户查询参数 */
 export interface SysUserQuery {
+  /** 绑定类型 */
   bindType?: number
+  /** 部门 ID 筛选 */
   deptId?: number
+  /** 搜索关键字（模糊匹配用户名） */
   queryStr?: string
+  /** 角色 ID 筛选 */
   roleId?: number
+  /** 状态筛选：1=启用, 2=禁用 */
   status?: number
+  /** 页码 */
   page?: number
+  /** 每页条数 */
   pageSize?: number
 }
 
 /** 用户创建请求 */
 export interface SysUserRequest {
+  /** 用户名 */
   username: string
+  /** 密码 */
   password: string
+  /** 邮箱 */
   email?: string
+  /** 手机号 */
   phone?: string
+  /** 昵称 */
   nickName?: string
+  /** 部门 ID */
   deptId?: number
+  /** 头像 URL */
   avatar?: string
+  /** 性别 */
   gender?: number
+  /** 状态 */
   status?: number
+  /** 个人简介 */
   introduction?: string
 }
 
 /** 用户更新请求 */
 export interface SysUserUpdate {
+  /** 邮箱 */
   email?: string
+  /** 手机号 */
   phone?: string
+  /** 昵称 */
   nickName?: string
+  /** 部门 ID */
   deptId?: number
+  /** 头像 URL */
   avatar?: string
+  /** 性别 */
   gender?: number
+  /** 状态 */
   status?: number
+  /** 个人简介 */
   introduction?: string
 }
 

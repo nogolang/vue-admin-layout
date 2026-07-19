@@ -3,6 +3,9 @@ import { ref, computed, toRaw } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getUserById, createUser, updateUser } from '@/api/system/sysUser'
 import type { SysUser } from '@/api/system/sysUser'
+import { useLocalStore } from '@/stores/useLocalStore'
+
+const localStore = useLocalStore<SysUser>('local_sysUser')
 
 // ==================== 对话框状态 ====================
 
@@ -15,6 +18,7 @@ const nowId = ref(0)
 
 // 表单扩展字段：password 仅新增时需要，后端实体不包含此字段
 interface UserForm extends SysUser {
+  /** 密码（仅新增时填写，编辑时不可见） */
   password?: string
 }
 
@@ -105,6 +109,7 @@ const addForm = async () => {
     status: form.value.status,
   })
   ElMessage.success('用户创建成功')
+  localStore.add({ ...form.value, id: 0 } as SysUser)
   dialogVisible.value = false
   emit('afterSave')
 }

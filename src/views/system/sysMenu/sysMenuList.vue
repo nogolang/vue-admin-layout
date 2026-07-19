@@ -5,6 +5,9 @@ import { Plus, Edit, Delete } from '@element-plus/icons-vue'
 import { getMenuTree, deleteMenu } from '@/api/system/sysMenu'
 import type { SysMenu } from '@/api/system/sysMenu'
 import SysMenuEdit from './sysMenuEdit.vue'
+import { useLocalStore } from '@/stores/useLocalStore'
+
+const localStore = useLocalStore<SysMenu>('local_sysMenu')
 
 // ==================== 菜单列表数据 ====================
 
@@ -37,7 +40,10 @@ const findAll = async () => {
   loading.value = true
   try {
     const res: any = await getMenuTree()
-    tableData.value = transformTree(res?.data || [])
+    const tree = transformTree(res?.data || [])
+    // 本地新增的菜单直接追加到根级
+    tree.push(...localStore.load())
+    tableData.value = tree
   } finally {
     loading.value = false
   }

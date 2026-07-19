@@ -6,6 +6,9 @@ import { getUserList, deleteUser } from '@/api/system/sysUser'
 import type { SysUser } from '@/api/system/sysUser'
 import SysUserEdit from './sysUserEdit.vue'
 import Pagination from '@/components/Pagination.vue'
+import { useLocalStore } from '@/stores/useLocalStore'
+
+const localStore = useLocalStore<SysUser>('local_sysUser')
 
 // ==================== 用户列表数据 ====================
 
@@ -32,7 +35,8 @@ const findAll = async () => {
       pageSize: query.value.pageSize,
       queryStr: query.value.queryStr || undefined,
     })
-    tableData.value = res?.data?.records || []
+    const apiData = (res?.data?.records || []) as SysUser[]
+    tableData.value = [...apiData, ...localStore.load()]
     total.value = Number.parseInt(res?.data?.total) || 0
   } finally {
     loading.value = false
