@@ -15,11 +15,8 @@
  */
 
 // ==================== 应用基本信息 ====================
-/** 应用名称（显示在浏览器标题栏、登录页等） */
+/** 应用名称（浏览器标题栏、Logo 旁文字、登录页等多处共用） */
 export const APP_TITLE = '通用管理框架'
-
-/** 应用 Logo 旁的文字（Header 左侧显示） */
-export const APP_LOGO_TEXT = '通用管理框架'
 
 /**
  * 运行时首页路径（可被后端返回的角色 home 字段覆盖）
@@ -35,12 +32,23 @@ export function setHomePath(path: string) {
 
 // ==================== 应用全局配置对象 ====================
 export const appConfig = {
+  // ==================== 登录配置 ====================
+  login: {
+    /**
+     * 是否启用后端登录
+     *
+     * true  → 调用 POST /userInfo/login 真实登录，后端返回 token
+     * false → 前端模拟登录，直接生成 mock token，方便前端独立开发测试
+     */
+    useBackendLogin: false,
+  },
+
   // ==================== 应用信息 ====================
   app: {
     /** 应用标题 */
     title: APP_TITLE,
     /** Logo 旁文字 */
-    logoText: APP_LOGO_TEXT,
+    logoText: APP_TITLE,
     /**
      * 默认首页路径（可配置，动态路由模式下可被后端覆盖）
      *
@@ -98,13 +106,13 @@ export const appConfig = {
   // ==================== 通知中心配置 ====================
   notice: {
     /**
-     * 是否启用 SSE 实时通知（铃铛组件）
+     * 是否启用 SSE 实时通知（Header 右侧铃铛）
      *
-     * true  → Header 右侧显示通知铃铛，组件挂载时自动建立 SSE 连接
+     * true  → 显示铃铛，自动建立 SSE 连接接收后端推送
      *         SSE 端点：GET /userInfo/notice/sse
      *         标为已读：POST /userInfo/notice/read
      *
-     * false → 不显示铃铛，不建立 SSE 连接（默认值，按需开启）
+     * false → 不显示铃铛，不建立 SSE 连接
      */
     enableSSE: false,
   },

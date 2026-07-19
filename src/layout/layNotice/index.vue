@@ -52,9 +52,6 @@ defineOptions({ name: 'LayNotice' })
 /** AbortController — 组件卸载时 abort 掉 fetch，避免内存泄漏 */
 let abortController: AbortController | null = null
 
-/** SSE 连接状态（当前未使用，预留用于 UI 指示器） */
-const sseConnected = ref(false)
-
 /**
  * 建立 SSE 连接
  *
@@ -92,7 +89,6 @@ async function connectSSE() {
       return
     }
 
-    sseConnected.value = true
     const reader = response.body.getReader()
     const decoder = new TextDecoder()
     let buffer = ''
@@ -124,7 +120,6 @@ async function connectSSE() {
   } catch (err: any) {
     // AbortError = 主动断开（disconnectSSE）→ 不重连
     if (err.name !== 'AbortError') {
-      sseConnected.value = false
       scheduleReconnect()
     }
   }
@@ -176,7 +171,6 @@ function scheduleReconnect() {
 function disconnectSSE() {
   abortController?.abort()
   abortController = null
-  sseConnected.value = false
 }
 
 // ==================== 通知数据管理 ====================
@@ -187,8 +181,8 @@ const notices = ref<TabItem[]>(createEmptyTabs())
 /** 当前激活的标签页 key（Tab v-model） */
 const activeKey = ref<string>(notices.value[0]!.key)
 
-/** el-dropdown 组件引用（用于关闭下拉面板） */
-const dropdownRef = ref<any>(null)
+/** el-dropdown 组件引用（调用 handleClose 关闭下拉面板） */
+const dropdownRef = ref<{ handleClose: () => void } | null>(null)
 
 /**
  * 将 SSE 推送的通知分发到对应标签页
@@ -224,9 +218,8 @@ const hasAnyNoticeData = computed(() => {
 
 // ==================== 操作 ====================
 
-/** 查看更多 → 关闭下拉面板 */
+/** 查看更多 → 关闭下拉面板（下游项目可改为 router.push 跳转到通知详情页） */
 const onWatchMore = () => {
-  // TODO: 接入真实路由后改为 router.push('/notifications')
   dropdownRef.value?.handleClose()
 }
 

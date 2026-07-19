@@ -1,13 +1,32 @@
 import type { MenuItem } from '@/router/menus'
 import request from '@/api/index'
 
+// ==================== 登录 API ====================
+
+/** 登录请求参数 */
+export interface LoginRequest {
+  username: string
+  password: string
+}
+
+/** 登录响应数据 */
+export interface LoginResult {
+  token: string
+}
+
 /**
- * ==================== /userInfo/info 返回值类型 ====================
+ * 登录
  *
- * 登录后调用此接口获取当前用户的完整信息：
- *   - menus: 该用户的菜单树（用于动态路由注册 + 侧边栏渲染）
- *   - home:  该用户/角色的默认首页路径
+ * POST /userInfo/login，在请求拦截器白名单中，无需预先携带 token。
+ * 响应拦截器已解包 response.data，调用方直接拿到 { token: '...' }。
  */
+export async function login(data: LoginRequest): Promise<LoginResult> {
+  return request.post('/userInfo/login', data)
+}
+
+// ==================== 用户信息 ====================
+
+/** 登录后调用 /userInfo/info 返回：menus（菜单树）、home（默认首页路径） */
 export interface UserInfoResult {
   /** 菜单树 */
   menus: MenuItem[]
@@ -36,21 +55,103 @@ export interface UserInfoResult {
  * 直接使用 menus.ts 中的 dynamicMenuList 数组。
  */
 export async function fetchUserInfo(): Promise<UserInfoResult> {
-  // ==================== 动态权限模式（useDynamicRoutes = true） ====================
-  // 替换为真实的后端请求：
-  //
-  // import type { ApiResponse } from '@/api/index'
-  // const res = await request.get<ApiResponse<UserInfoResult>>('/userInfo/info')
-  // return res.data
-  //
-  // 注意：request 响应拦截器已解包 response → response.data，
-  //       所以这里直接拿到的是 { menus: [...], home: "..." }
-
-  // ==================== 静态路由模式（useDynamicRoutes = false） ====================
-  // 静态模式下不会调用此函数。
-  // 保留此函数作为接口定义，方便后续切换为动态模式。
-
   return { menus: [], home: '/home' }
+}
+
+// ==================== 用户管理 CRUD ====================
+
+/** 用户实体 */
+export interface SysUser {
+  id: number
+  username: string
+  nickName?: string
+  email?: string
+  phone?: string
+  avatar?: string
+  gender?: number
+  deptId?: number
+  status?: number
+  introduction?: string
+  roles?: { id: number; name: string }[]
+  [key: string]: any
+}
+
+/** 用户查询参数 */
+export interface SysUserQuery {
+  bindType?: number
+  deptId?: number
+  queryStr?: string
+  roleId?: number
+  status?: number
+  page?: number
+  pageSize?: number
+}
+
+/** 用户创建请求 */
+export interface SysUserRequest {
+  username: string
+  password: string
+  email?: string
+  phone?: string
+  nickName?: string
+  deptId?: number
+  avatar?: string
+  gender?: number
+  status?: number
+  introduction?: string
+}
+
+/** 用户更新请求 */
+export interface SysUserUpdate {
+  email?: string
+  phone?: string
+  nickName?: string
+  deptId?: number
+  avatar?: string
+  gender?: number
+  status?: number
+  introduction?: string
+}
+
+/** 重置密码请求 */
+export interface ResetPasswordRequest {
+  userId: number
+  newPassword: string
+}
+
+/** 创建用户 */
+export async function createUser(data: SysUserRequest) {
+  return request.post('/admin/edu/sysUser/add', data)
+}
+
+/** 更新用户 */
+export async function updateUser(id: number, data: SysUserUpdate) {
+  return request.put(`/admin/edu/sysUser/updateById/${id}`, data)
+}
+
+/** 批量删除用户 */
+export async function deleteUser(ids: number[]) {
+  return request.post('/admin/edu/sysUser/deleteByIds', { ids })
+}
+
+/** 根据 ID 查询用户 */
+export async function getUserById(id: number) {
+  return request.get(`/admin/edu/sysUser/getById/${id}`)
+}
+
+/** 分页查询用户列表 */
+export async function getUserList(params?: SysUserQuery) {
+  return request.post('/admin/edu/sysUser/find', params || {})
+}
+
+/** 无分页查询用户列表（用于下拉选择等场景） */
+export async function getUserListNoPagination(params?: Partial<SysUserQuery>) {
+  return request.post('/admin/edu/sysUser/find', { ...params, pagination: false })
+}
+
+/** 重置用户密码 */
+export async function resetPassword(data: ResetPasswordRequest) {
+  return request.put('/admin/edu/sysUser/resetPassword', data)
 }
 
 // ==================== 通知 API ====================
@@ -64,11 +165,5 @@ export async function fetchUserInfo(): Promise<UserInfoResult> {
  * @param type  通知类型：'1'=通知, '2'=消息, '3'=待办
  */
 export async function markNoticeRead(type: string): Promise<void> {
-  // 替换为真实请求：
-  // await request.post('/userInfo/notice/read', { type })
-  // 或：
-  // import type { ApiResponse } from '@/api/index'
-  // await request.post<ApiResponse<null>>('/userInfo/notice/read', { type })
-
   await request.post('/userInfo/notice/read', { type })
 }

@@ -263,7 +263,7 @@ const currentAffix = () => {
 /* ==================== 标签页容器 ==================== */
 .tabbar-wrap {
   flex-shrink: 0;               /* 不参与 flex 伸缩，保持固定高度 */
-  background: hsl(0 0% 100%);
+  background: hsl(var(--header));
   padding: 0 8px;
 }
 

@@ -11,9 +11,7 @@ import { ref } from 'vue'
  *   2. 存储用户基本信息
  *   3. 提供登录/退出方法
  *
- * 持久化建议：
- *   当前 token 仅存储在内存中（刷新会丢失）。
- *   如需持久化（刷新保持登录），可配合 pinia-plugin-persistedstate 使用。
+ * token 通过 watch 自动持久化到 localStorage，刷新不丢失。
  *
  * 使用示例：
  *   const userStore = useUserStore()
@@ -22,7 +20,7 @@ import { ref } from 'vue'
  *   userStore.clearToken()        // 退出登录时清除
  */
 export const useUserStore = defineStore('user', () => {
-  /** 认证令牌（原始字符串，不含 Bearer 前缀） */
+  /** 认证令牌（由 pinia-plugin-persistedstate 持久化到 localStorage） */
   const token = ref<string>('')
 
   /** 当前登录用户信息（可根据项目需求扩展字段） */
@@ -106,4 +104,9 @@ export const useUserStore = defineStore('user', () => {
     clearUserInfo,
     clearUserState,
   }
+}, {
+  persist: {
+    key: 'admin-user',
+    pick: ['token'],
+  },
 })

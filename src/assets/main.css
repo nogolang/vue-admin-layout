@@ -148,6 +148,7 @@
 
   /* ---- 菜单项 ---- */
   --menu: var(--sidebar);                    /* 菜单背景（跟随侧边栏） */
+  --ml: 12px;                               /* 菜单缩进起点（MenuNode 组件按 depth*16px+12px 逐级覆盖） */
   --menu-font-size: 14px;                   /* 菜单文字大小 */
   --menu-icon-size: 16px;                   /* 菜单图标大小 */
   --menu-item-height: 38px;                /* 菜单项高度 */

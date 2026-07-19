@@ -88,18 +88,20 @@ export const usePermissionStore = defineStore('permission', () => {
       menus = result.menus
 
       // 用后端返回的 home 字段更新运行时首页路径
-      // 此时 router 中 / 的 redirect 会自动指向新路径（因为读取的是 getter）
       setHomePath(result.home)
     } else {
-      // 【静态路由模式】直接使用前端定义的菜单数据
+      // 【静态路由模式】使用前端定义的菜单数据
+      // staticMenus 也需要转路由（如 /system/role、/system/user），
+      // 仅 /home 已在 router/index.ts 中静态注册，由 pathToName 产生的
+      // 路由名 'home'（小写）与静态注册的 'Home'（大写）不冲突
       menus = dynamicMenuList
     }
 
-    // 存储原始菜单数据
+    // 存储动态菜单数据
     dynamicMenus.value = menus
 
-    // 菜单 → 路由配置 → 逐个注册到 'Root' 布局路由下
-    const routes = menusToRoutes(menus)
+    // 静态菜单 + 动态菜单 → 路由配置 → 逐个注册到 'Root' 布局路由下
+    const routes = menusToRoutes([...staticMenus, ...menus])
     for (const route of routes) {
       addRoute(route)
     }

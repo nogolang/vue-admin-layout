@@ -1,3 +1,4 @@
+import type { Component } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 import type { MenuItem } from './menus'
 
@@ -9,13 +10,23 @@ import type { MenuItem } from './menus'
  *
  * 添加新页面的步骤：
  *   1. 在 src/views/ 下创建 .vue 文件
- *   2. 在此添加一条映射：'/your/path': () => import('@/views/your-path/index.vue')
+ *   2. 在此添加一条映射：'/your/path': () => import('@/views/your-path/xxxList.vue')
  *   3. 在 menus.ts 的菜单数据中引用 component: '/your/path'
  *
  * 找不到对应 component 的菜单项会被静默跳过（不会注入路由）。
  */
-const componentMap: Record<string, () => Promise<any>> = {
+const componentMap: Record<string, () => Promise<Component>> = {
   '/home': () => import('@/views/home/index.vue'),
+  '/system/role': () => import('@/views/system/sysRole/sysRoleList.vue'),
+  '/system/user': () => import('@/views/system/sysUser/sysUserList.vue'),
+  '/system/menu': () => import('@/views/system/sysMenu/sysMenuList.vue'),
+  '/system/api': () => import('@/views/system/sysApi/sysApiList.vue'),
+  '/test/m1/g1/page1': () => import('@/views/test/m1/g1/page1.vue'),
+  '/test/m1/g1/page2': () => import('@/views/test/m1/g1/page2.vue'),
+  '/test/m1/g2/page1': () => import('@/views/test/m1/g2/page1.vue'),
+  '/test/m2/g1/page1': () => import('@/views/test/m2/g1/page1.vue'),
+  '/test/m1/g1/sg1/page1': () => import('@/views/test/m1/g1/sg1/page1.vue'),
+  '/test/m1/g1/sg1/page2': () => import('@/views/test/m1/g1/sg1/page2.vue'),
 }
 
 /**

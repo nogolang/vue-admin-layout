@@ -20,6 +20,7 @@
 // ==================== 全局样式引入 ====================
 import 'element-plus/dist/index.css'  // Element Plus 组件库样式
 import './assets/main.css'             // 自定义设计令牌 & 全局基础样式
+import './assets/css/page.scss'        // 列表页通用样式（sys-page / toolbar）
 
 // ==================== Vue 核心 ====================
 import { createApp } from 'vue'
@@ -27,6 +28,7 @@ import App from './App.vue'
 
 // ==================== 插件 ====================
 import { createPinia } from 'pinia'         // 状态管理
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import ElementPlus from 'element-plus'      // UI 组件库
 
 // ==================== 路由 ====================
@@ -41,7 +43,10 @@ const app = createApp(App)
 app.use(ElementPlus, { zIndex: 3000 })
 
 // 2. 注册 Pinia（必须在 Router 之前注册！）
-app.use(createPinia())
+// 创建 pinia 实例并注册持久化插件
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
+app.use(pinia)
 
 // 3. 注册路由
 app.use(router)

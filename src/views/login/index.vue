@@ -1,47 +1,52 @@
 <!--
   ==================== 登录页 ====================
 
-  独立于 BasicLayout 的登录页面（meta.hidden = true）。
-  接入真实认证系统后请替换为实际的登录逻辑。
-
-  页面结构：
-    - 左侧品牌展示区（渐变背景 + 品牌信息）
-    - 右侧登录表单区（用户名 + 密码 + 登录按钮）
-
-  接入步骤：
-    1. 将表单提交事件替换为真实的登录 API 调用
-    2. 登录成功后保存 token（localStorage / cookie）
-    3. 跳转到首页或重定向地址
-    4. 在路由守卫中增加 token 检查逻辑
+  独立于 BasicLayout 的登录页面。
+  appConfig.login.useBackendLogin 控制是否请求后端：
+    false → 前端模拟登录，生成 mock token
+    true  → 调用 POST /userInfo/login
 -->
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { appConfig, APP_TITLE } from '@/app.config'
+import { useUserStore } from '@/stores/user'
+import { login } from '@/api/system/sysUser'
 
 defineOptions({ name: 'LoginPage' })
 
 const router = useRouter()
+const loading = ref(false)
 
 /** 登录表单数据 */
 const loginForm = ref({
-  username: 'admin',
+  username: '',
   password: '',
 })
 
-/**
- * 登录处理
- *
- * TODO: 接入真实登录 API
- *   1. 调用登录接口获取 token
- *   2. 存储 token（例如：localStorage.setItem('token', token)）
- *   3. 跳转到首页：router.push(appConfig.app.homePath)
- *   4. 如需要，重新拉取动态路由
- */
-function handleLogin() {
-  // 模拟登录（项目开发阶段使用）
-  if (loginForm.value.username) {
+/** 根据 appConfig.login.useBackendLogin 开关执行后端登录或前端模拟登录 */
+async function handleLogin() {
+  if (!loginForm.value.username) {
+    ElMessage.warning('请输入用户名')
+    return
+  }
+  loading.value = true
+  try {
+    if (appConfig.login.useBackendLogin) {
+      const result = await login(loginForm.value)
+      useUserStore().setToken(`Bearer ${result.token}`)
+    } else {
+      // 前端模拟登录，用于不依赖后端的开发测试
+      await new Promise((r) => setTimeout(r, 600))
+      useUserStore().setToken(`Bearer mock-${loginForm.value.username}`)
+    }
+    ElMessage.success('登录成功')
     router.push(appConfig.app.homePath)
+  } catch {
+    ElMessage.error('登录失败，请检查用户名和密码')
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -105,6 +110,7 @@ function handleLogin() {
               type="primary"
               size="large"
               class="login-btn"
+              :loading="loading"
               @click="handleLogin"
             >
               登 录
@@ -112,7 +118,7 @@ function handleLogin() {
           </el-form-item>
         </el-form>
 
-        <p class="form-tip">提示：当前为演示模式，输入任意用户名即可登录</p>
+        <p class="form-tip">{{ appConfig.login.useBackendLogin ? '已启用后端登录' : '前端模拟登录，输入用户名即可' }}</p>
       </div>
     </div>
   </div>

@@ -53,6 +53,9 @@ export const useLayoutStore = defineStore('layout', () => {
    */
   const sidebarCollapsed = ref(false)
 
+  /** 侧边栏拖拽宽度（px），默认 224，范围 160~480 */
+  const sidebarWidth = ref(224)
+
   // ==================== 计算属性（模板中使用） ====================
 
   /** 当前是否为垂直侧边栏模式 */
@@ -77,6 +80,7 @@ export const useLayoutStore = defineStore('layout', () => {
   return {
     layout,
     sidebarCollapsed,
+    sidebarWidth,
     isSidebarNav,
     isSidebarMixedNav,
     toggleSidebar,
