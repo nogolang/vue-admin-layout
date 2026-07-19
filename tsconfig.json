@@ -1,4 +1,19 @@
 {
+  /**
+   * ==================== TypeScript 根配置文件 ====================
+   *
+   * 不直接配置编译选项，而是通过 references 引用两个子配置：
+   *   - tsconfig.node.json → Vite 配置等 Node.js 环境代码
+   *   - tsconfig.app.json  → 浏览器端应用代码（Vue SFC、TypeScript 源码等）
+   *
+   * 为什么拆分？
+   *   tsconfig.node.json 和 tsconfig.app.json 面向不同的运行环境（Node vs 浏览器），
+   *   需要不同的编译目标和类型定义，拆开后互不干扰。
+   *
+   * vue-tsc --build 使用项目引用模式：
+   *   - 自动增量编译（基于 .tsbuildinfo 缓存）
+   *   - 只检查类型，不输出 JS 文件（配合 noEmit）
+   */
   "files": [],
   "references": [
     {
