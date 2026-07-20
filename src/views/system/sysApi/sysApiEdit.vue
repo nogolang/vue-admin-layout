@@ -10,14 +10,10 @@ import {
   getApiById,
 } from '@/api/system/sysApi'
 import type { SysApi, SysApiRequest, SysApiGroupRequest } from '@/api/system/sysApi'
-import { useLocalStore } from '@/stores/useLocalStore'
-
-const localStore = useLocalStore<SysApi>('local_sysApi')
 
 // ==================== 对话框状态 ====================
 
 const dialogVisible = ref(false)
-const saved = ref(false) // 标记是否已成功提交，防止 @close 时重复保存草稿
 const emit = defineEmits(['afterSave'])
 const formRef = ref()
 const formType = ref<'group' | 'api'>('api')
@@ -116,22 +112,9 @@ const open = async (id: number, groupId?: number) => {
     const row: SysApi = res?.data || res || {}
     form.value = { name: '', path: row.path || '', method: row.method || 'GET', description: row.description || '' }
   } else {
-    const draft = localStore.load()
-    form.value = draft ? { ...draft } : { ...formTemp }
+    clear()
   }
   dialogVisible.value = true
-}
-
-// 弹框关闭时保存草稿（仅接口，已提交/服务端数据则跳过）
-const handleCancel = () => {
-  if (saved.value) {
-    saved.value = false
-    return
-  }
-  if (formType.value === 'group' || nowId.value > 0) {
-    return
-  }
-  localStore.save({ ...form.value, groupId: nowGroupId.value, id: 0 } as SysApi)
 }
 
 // ==================== 新增 / 修改 ====================
@@ -151,10 +134,8 @@ const addForm = async () => {
   } else {
     await createApi({ ...form.value, groupId: nowGroupId.value } as SysApiRequest)
     ElMessage.success('接口创建成功')
-    localStore.remove()
   }
 
-  saved.value = true
   dialogVisible.value = false
   emit('afterSave')
 }
@@ -176,7 +157,6 @@ const updateForm = async () => {
     ElMessage.success('接口更新成功')
   }
 
-  saved.value = true
   dialogVisible.value = false
   emit('afterSave')
 }
@@ -191,7 +171,7 @@ defineExpose({
 
 <template>
   <div>
-    <el-dialog :title="title" draggable :close-on-click-modal="false" v-model="dialogVisible" @close="handleCancel">
+    <el-dialog :title="title" draggable :close-on-click-modal="false" v-model="dialogVisible">
       <el-form ref="formRef" @submit.prevent :model="form" :rules="rules" label-position="left" label-width="auto">
         <template v-if="formType === 'group'">
           <el-form-item label="分组名称" prop="name">
