@@ -68,15 +68,17 @@ const findAll = async () => {
   try {
     const res: any = await getApiGroupList()
     const groups = transformData(res?.data?.list || [])
-    // 本地新增的接口直接追加到第一个分组
+    // 本地新增的接口追加到对应分组下
     const draft = localStore.load()
-    const firstGroup = groups[0]
-    if (draft && firstGroup) {
-      firstGroup.children.push({
-        ...draft,
-        rowKey: `api-${draft.id}`,
-        groupId: draft.groupId || firstGroup.id,
-      } as ApiTableRow)
+    if (draft) {
+      const target = groups.find((g) => g.id === draft.groupId) || groups[0]
+      if (target) {
+        target.children.push({
+          ...draft,
+          rowKey: `api-${draft.id}`,
+          groupId: target.id,
+        } as ApiTableRow)
+      }
     }
     tableData.value = groups
   } finally {
