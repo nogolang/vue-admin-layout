@@ -12,44 +12,29 @@ import { appConfig, setHomePath } from '@/app.config'
  * ==================== 权限 & 动态路由状态管理 ====================
  *
  * 核心职责：
- *   1. 获取用户菜单数据（静态模式读前端数据，动态模式调后端 API）
- *   2. 将菜单数据转换为 vue-router 路由配置
- *   3. 将动态路由注入到 Root 布局路由下
- *   4. 合并静态菜单 + 动态菜单，供 BasicLayout 渲染侧边栏
- *   5. 提供 resetRoutes() 用于退出登录时清除所有动态路由
+ *   1. 获取菜单数据（静态模式读前端数据，动态模式调后端 API）
+ *   2. 将菜单数据转换为 vue-router 路由，注入到 Root 布局下
+ *   3. 合并静态 + 动态菜单，供 BasicLayout 渲染侧边栏
+ *   4. 提供 resetRoutes() 用于退出登录时清除所有动态路由
  *
- * 两种模式说明：
- *   【静态路由模式】appConfig.route.useDynamicRoutes === false
- *     菜单数据来自 menus.ts 中的 dynamicMenuList 数组。
- *     所有用户看到的菜单一样，无需后端接口。
- *     适合：单角色后台、无权限需求、或纯前端项目。
+ * 两种模式（通过 appConfig.route.useDynamicRoutes 切换）：
+ *   false → 静态模式：使用 menus.ts 中的 dynamicMenuList
+ *   true  → 动态模式：调用后端 API 获取菜单和首页路径
  *
- *   【动态权限模式】appConfig.route.useDynamicRoutes === true
- *     菜单数据来自后端 API（fetchUserInfo() → /userInfo/info），后端根据角色返回菜单树和首页路径。
- *     适合：多角色后台系统，不同用户看到不同菜单。
- *
- * 切换方式：
- *   修改 src/config/app.ts 中的 appConfig.route.useDynamicRoutes 即可。
- *
- * 关键状态：
- *   isRoutesLoaded   —— 防止重复请求（页面刷新时会重置为 false）
- *   dynamicMenus      —— 菜单原始数据
- *   addedRouteNames   —— 已注册的路由名称列表（用于 removeRoute）
- *   allMenus          —— 静态菜单 + 动态菜单（computed，自动响应变化）
- *
- * 调用时机：
- *   - 首次进入应用 → 路由守卫自动调用 generateRoutes()
- *   - 退出登录     → 手动调用 resetRoutes() 清除路由
+ * 调用时机（由 appConfig.route.loadRoutesOn 控制）：
+ *   - 'startup' → main.ts 启动时调用 generateRoutes()，每次页面刷新重新获取
+ *   - 'login'   → 登录成功后调用 generateRoutes()，后续由 isRoutesLoaded 幂等保护
+ *   - 退出登录时调用 resetRoutes() 清除路由
  */
 export const usePermissionStore = defineStore('permission', () => {
   /** 后端返回（或前端定义）的动态菜单原始数据 */
   const dynamicMenus = ref<MenuItem[]>([])
 
-  /** 是否已完成动态路由加载（幂等保护，防止重复请求） */
-  const isRoutesLoaded = ref(false)
-
   /** 已通过 router.addRoute 注册的路由名称，用于 reset 时逐个移除 */
   const addedRouteNames = ref<string[]>([])
+
+  /** 路由是否已加载（幂等保护，防止重复调用 generateRoutes） */
+  const isRoutesLoaded = ref(false)
 
   /**
    * 完整菜单列表（computed，自动合并静态 + 动态）
@@ -65,53 +50,34 @@ export const usePermissionStore = defineStore('permission', () => {
    *   - 动态模式 → 调用 fetchMenus() 从后端获取
    *
    * 执行流程：
-   *   1. 检查 isRoutesLoaded，已加载则直接返回（避免重复请求）
-   *   2. 获取菜单数据（静态或动态）
-   *   3. 调用 menusToRoutes() 将菜单转为路由配置
-   *   4. 调用 addRoute() 递归注册到 Root 路由节点
-   *   5. 标记 isRoutesLoaded = true
+ *   1. 获取菜单数据（静态或动态）
+ *   2. 调用 menusToRoutes() 将菜单转为路由配置
+ *   3. 调用 addRoute() 递归注册到 Root 路由节点
    */
   async function generateRoutes() {
-    // 幂等保护：已加载则跳过
     if (isRoutesLoaded.value) return
 
-    /**
-     * 根据配置选择菜单数据来源：
-     *   useDynamicRoutes = true  → 调用后端 API
-     *   useDynamicRoutes = false → 使用前端硬编码数据
-     */
     let menus: MenuItem[]
 
     if (appConfig.route.useDynamicRoutes) {
-      // 【动态权限模式】从后端 API 获取菜单 + 角色首页
       const result = await fetchUserInfo()
       menus = result.menus
-
-      // 用后端返回的 home 字段更新运行时首页路径
       setHomePath(result.home)
     } else {
-      // 【静态路由模式】使用前端定义的菜单数据
-      // staticMenus 也需要转路由（如 /system/role、/system/user），
-      // 仅 /home 已在 router/index.ts 中静态注册，由 pathToName 产生的
-      // 路由名 'home'（小写）与静态注册的 'Home'（大写）不冲突
       menus = dynamicMenuList
     }
 
-    // 存储动态菜单数据
     dynamicMenus.value = menus
 
-    // 静态菜单 + 动态菜单 → 路由配置
     const routes = menusToRoutes([...staticMenus, ...menus])
     for (const route of routes) {
       if (route.meta?.hidden) {
-        // 隐藏路由（如登录页）注册为顶层路由，不包裹在 BasicLayout 中
         router.addRoute(route)
       } else {
         addRoute(route)
       }
     }
 
-    // 标记加载完成
     isRoutesLoaded.value = true
   }
 

@@ -26,6 +26,7 @@ import { useLayoutStore } from '@/stores/layout'
 import { usePermissionStore } from '@/stores/permission'
 import { useUserStore } from '@/stores/user'
 import { appConfig } from '@/app.config'
+import { logout } from '@/api/system/sysUser'
 import { iconMap } from '@/router/menus'
 import type { MenuItem } from '@/router/menus'
 import LayoutTabbar from './components/Tabbar.vue'
@@ -44,6 +45,13 @@ const router = useRouter()
 const layoutStore = useLayoutStore()
 const permissionStore = usePermissionStore()
 const userStore = useUserStore()
+
+/** 退出登录：通知后端 + 清除前端状态 + 跳转登录页 */
+async function handleLogout() {
+  try { await logout() } catch { /* 后端不可达时仍要清理前端状态 */ }
+  await userStore.clearUserState()
+  router.push('/login')
+}
 
 /** 侧边栏菜单（过滤掉 meta.hidden 的页面，如登录页） */
 const menuList = computed(() => permissionStore.allMenus.filter((m) => !m.meta?.hidden))
@@ -127,9 +135,6 @@ function openActiveSubmenus() {
 //   3. 动态路由加载完成（菜单数据从无到有）
 onMounted(() => openActiveSubmenus())
 watch(() => route.path, () => openActiveSubmenus())
-watch(() => permissionStore.isRoutesLoaded, (loaded) => {
-  if (loaded) openActiveSubmenus()
-})
 
 // ==================== 5. 双列侧边栏（sidebar-mixed-nav）逻辑 ====================
 
@@ -178,9 +183,6 @@ function openExtraSubmenus() {
 }
 
 onMounted(() => { syncActiveTopMenu(); openExtraSubmenus() })
-watch(() => permissionStore.isRoutesLoaded, (loaded) => {
-  if (loaded) { syncActiveTopMenu(); openExtraSubmenus() }
-})
 watch(() => route.path, () => { syncActiveTopMenu(); openExtraSubmenus() })
 
 /**
@@ -227,7 +229,7 @@ function handleTopMenuClick(menu: MenuItem) {
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="router.push('/home')">{{ appConfig.app.logoText }}首页</el-dropdown-item>
-              <el-dropdown-item divided @click="userStore.clearUserState()">退出登录</el-dropdown-item>
+              <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>

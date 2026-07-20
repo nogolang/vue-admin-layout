@@ -31,7 +31,18 @@ export function setHomePath(path: string) {
 }
 
 // ==================== 应用全局配置对象 ====================
-export const appConfig = {
+
+/** 应用配置类型约束，新增配置项时在此追加字段 */
+interface AppConfig {
+  login: { useBackendLogin: boolean }
+  app: { title: string; logoText: string; readonly homePath: string }
+  route: { useDynamicRoutes: boolean; loadRoutesOn: 'startup' | 'login' }
+  layout: { mode: 'sidebar-nav' | 'sidebar-mixed-nav' }
+  notice: { enableSSE: boolean }
+  tabbar: { showTabbar: boolean; affixPaths: readonly string[] }
+}
+
+export const appConfig: AppConfig = {
   // ==================== 登录配置 ====================
   login: {
     /**
@@ -88,6 +99,15 @@ export const appConfig = {
      * 两种模式的切换只需修改此处，其余代码自动适配。
      */
     useDynamicRoutes: false,
+
+    /**
+     * 路由加载时机
+     *
+     * 'startup' → 应用启动时（main.ts）加载路由，每次页面刷新重新获取
+     * 'login'   → 登录成功后加载路由，配合 isRoutesLoaded 幂等保护，
+     *              路由守卫会拦截未加载路由时的页面访问
+     */
+    loadRoutesOn: 'startup',
   },
 
   // ==================== 布局配置 ====================
@@ -100,7 +120,7 @@ export const appConfig = {
      *
      * 修改后重新启动即可生效。
      */
-    mode: 'sidebar-mixed-nav' as 'sidebar-nav' | 'sidebar-mixed-nav',
+    mode: 'sidebar-mixed-nav',
   },
 
   // ==================== 通知中心配置 ====================
@@ -134,9 +154,9 @@ export const appConfig = {
      * 默认将首页设为固定标签。
      * 可根据项目需求添加更多固定路径。
      */
-    affixPaths: ['/home'] as readonly string[],
+    affixPaths: ['/home'],
   },
-} as const
+}
 
 /**
  * ==================== 环境变量访问封装 ====================

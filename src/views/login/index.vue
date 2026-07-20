@@ -7,7 +7,7 @@
     true  → 调用 POST /userInfo/login
 -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { appConfig, APP_TITLE } from '@/app.config'
@@ -18,6 +18,19 @@ defineOptions({ name: 'LoginPage' })
 
 const router = useRouter()
 const loading = ref(false)
+
+// 'login' 模式：页面刷新后 token 仍在，但 isRoutesLoaded 已复位，
+// 路由守卫会重定向到 /login，此处自动完成路由加载并跳转
+onMounted(async () => {
+  if (
+    appConfig.route.loadRoutesOn === 'login' &&
+    useUserStore().getToken()
+  ) {
+    const { usePermissionStore } = await import('@/stores/permission')
+    await usePermissionStore().generateRoutes()
+    router.replace(appConfig.app.homePath)
+  }
+})
 
 /** 登录表单数据 */
 const loginForm = ref({
@@ -42,6 +55,13 @@ async function handleLogin() {
       useUserStore().setToken(`Bearer mock-${loginForm.value.username}`)
     }
     ElMessage.success('登录成功')
+
+    // 如果配置为登录后加载路由，在此触发路由生成
+    if (appConfig.route.loadRoutesOn === 'login') {
+      const { usePermissionStore } = await import('@/stores/permission')
+      await usePermissionStore().generateRoutes()
+    }
+
     router.push(appConfig.app.homePath)
   } catch {
     ElMessage.error('登录失败，请检查用户名和密码')
