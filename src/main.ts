@@ -19,7 +19,8 @@
 
 // ==================== 全局样式引入 ====================
 import 'element-plus/dist/index.css'  // Element Plus 组件库样式
-import './assets/main.css'             // 自定义设计令牌 & 全局基础样式
+import './assets/css/variables.css'   // 设计令牌（CSS 自定义属性）
+import './assets/main.scss'             // 全局基础样式（reset、滚动条、Element Plus 覆盖）
 import './assets/css/page.scss'        // 列表页通用样式（sys-page / toolbar）
 
 // ==================== Vue 核心 ====================

@@ -30,7 +30,8 @@ const findAll = async () => {
     const res: any = await getRoleTree()
     const tree: SysRole[] = res?.data || []
     // 本地新增的角色直接追加到根级
-    tree.push(...localStore.load())
+    const draft = localStore.load()
+    if (draft) tree.push(draft)
     tableData.value = tree
   } finally {
     loading.value = false

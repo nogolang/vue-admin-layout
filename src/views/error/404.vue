@@ -70,7 +70,7 @@ function goBack() {
   font-size: 120px;
   font-weight: 800;
   line-height: 1;
-  color: hsl(var(--primary) / 0.3);
+  color: hsl(var(--primary) /0.3);
   margin-bottom: 16px;
   letter-spacing: -4px;
   user-select: none; /* 不可选中，纯装饰 */

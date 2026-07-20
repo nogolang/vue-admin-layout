@@ -68,16 +68,15 @@ const findAll = async () => {
   try {
     const res: any = await getApiGroupList()
     const groups = transformData(res?.data?.list || [])
-    // 本地新增的接口直接追加到第一个分组，或作为独立分组
-    const localItems = localStore.load()
-    if (localItems.length && groups.length) {
-      groups[0].children.push(
-        ...localItems.map((item) => ({
-          ...item,
-          rowKey: `api-${item.id}`,
-          groupId: (item as any).groupId || groups[0].id,
-        } as ApiTableRow)),
-      )
+    // 本地新增的接口直接追加到第一个分组
+    const draft = localStore.load()
+    const firstGroup = groups[0]
+    if (draft && firstGroup) {
+      firstGroup.children.push({
+        ...draft,
+        rowKey: `api-${draft.id}`,
+        groupId: draft.groupId || firstGroup.id,
+      } as ApiTableRow)
     }
     tableData.value = groups
   } finally {
@@ -94,7 +93,7 @@ const addGroup = () => {
 
 // 新建接口
 const addApi = (groupId?: number) => {
-  editRef.value?.openApi(0, groupId)
+  editRef.value?.open(0, groupId)
 }
 
 // 编辑分组
@@ -104,7 +103,7 @@ const updateGroupById = (row: SysApiGroup) => {
 
 // 编辑接口
 const updateApiById = (row: ApiTableRow) => {
-  editRef.value?.openApi(row.id)
+  editRef.value?.open(row.id)
 }
 
 // 删除分组

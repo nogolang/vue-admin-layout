@@ -25,7 +25,7 @@ defineOptions({ name: 'HomePage' })
         <!-- 欢迎图标 -->
         <div class="welcome-icon">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-            <rect width="48" height="48" rx="12" fill="hsl(var(--primary) / 0.1)" />
+            <rect width="48" height="48" rx="12" fill="hsl(var(--primary) /0.1)" />
             <path
               d="M24 14c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
               fill="hsl(var(--primary))"
@@ -162,7 +162,7 @@ defineOptions({ name: 'HomePage' })
   line-height: 1.5;
 
   code {
-    background: hsl(var(--primary) / 0.1);
+    background: hsl(var(--primary) /0.1);
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 12px;

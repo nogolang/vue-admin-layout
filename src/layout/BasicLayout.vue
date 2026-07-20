@@ -340,7 +340,7 @@ function handleTopMenuClick(menu: MenuItem) {
 <!-- ==================== 样式（scoped） ==================== -->
 <style scoped lang="scss">
 /*
- * 设计变量说明（定义在 src/assets/main.css）：
+ * 设计变量说明（定义在 src/assets/css/variables.scss）：
  *   --header-height          Header 高度（48px）
  *   --sidebar-width          侧边栏展开宽度（224px，可被 JS 拖拽覆盖）
  *   --sidebar-collapse-width 侧边栏折叠宽度（60px）
@@ -543,7 +543,7 @@ function handleTopMenuClick(menu: MenuItem) {
   // 鼠标悬停或拖拽时显示蓝色指示线
   &:hover,
   &:active {
-    background: hsl(var(--primary) / 0.5);
+    background: hsl(var(--primary) /0.5);
   }
 }
 
@@ -561,9 +561,9 @@ function handleTopMenuClick(menu: MenuItem) {
     height: var(--menu-item-height);
     line-height: var(--menu-item-height);
     margin: var(--menu-item-margin-y) var(--menu-item-margin-x);
-    padding: 0 12px 0 var(--ml, 12px) !important;
+    padding: 0 12px 0 var(--ml) !important;
     font-size: var(--menu-font-size);
-    color: hsl(var(--foreground) / 0.75);
+    color: hsl(var(--foreground) /0.75);
     border-radius: var(--menu-item-radius);
     transition: all 0.2s ease;
 
@@ -575,7 +575,7 @@ function handleTopMenuClick(menu: MenuItem) {
     // 激活态：主题色文字 + 浅色背景 + 左侧 3px 指示条
     &.is-active {
       color: hsl(var(--primary));
-      background: hsl(var(--primary) / 0.1) !important;
+      background: hsl(var(--primary) /0.1) !important;
       font-weight: 500;
 
       &::before {
@@ -598,9 +598,9 @@ function handleTopMenuClick(menu: MenuItem) {
     height: var(--menu-item-height);
     line-height: var(--menu-item-height);
     margin: var(--menu-item-margin-y) var(--menu-item-margin-x);
-    padding: 0 12px 0 var(--ml, 12px) !important;
+    padding: 0 12px 0 var(--ml) !important;
     font-size: var(--menu-font-size);
-    color: hsl(var(--foreground) / 0.75);
+    color: hsl(var(--foreground) /0.75);
     border-radius: var(--menu-item-radius);
     transition: all 0.2s ease;
 
@@ -712,7 +712,7 @@ function handleTopMenuClick(menu: MenuItem) {
 
   &.active {
     color: hsl(var(--primary));
-    background: hsl(var(--primary) / 0.1);
+    background: hsl(var(--primary) /0.1);
 
     :deep(.el-icon) { opacity: 1; }
   }
@@ -819,7 +819,7 @@ function handleTopMenuClick(menu: MenuItem) {
     margin: 2px 8px;
     padding: 0 12px !important;
     font-size: 14px;
-    color: hsl(var(--foreground) / 0.75);
+    color: hsl(var(--foreground) /0.75);
     border-radius: 6px;
     transition: all 0.15s ease;
 
@@ -830,7 +830,7 @@ function handleTopMenuClick(menu: MenuItem) {
 
     &.is-active {
       color: hsl(var(--primary));
-      background: hsl(var(--primary) / 0.1);
+      background: hsl(var(--primary) /0.1);
       font-weight: 500;
     }
   }

@@ -2,7 +2,7 @@
 import { ref, computed, toRaw } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getUserById, createUser, updateUser } from '@/api/system/sysUser'
-import type { SysUser } from '@/api/system/sysUser'
+import type { SysUser, SysUserRequest, SysUserUpdate } from '@/api/system/sysUser'
 import { useLocalStore } from '@/stores/useLocalStore'
 
 const localStore = useLocalStore<SysUser>('local_sysUser')
@@ -10,6 +10,7 @@ const localStore = useLocalStore<SysUser>('local_sysUser')
 // ==================== 对话框状态 ====================
 
 const dialogVisible = ref(false)
+const saved = ref(false) // 标记是否已成功提交，防止 @close 时重复保存草稿
 const emit = defineEmits(['afterSave'])
 const formRef = ref()
 const nowId = ref(0)
@@ -73,20 +74,28 @@ const clear = () => {
 // ==================== 对外暴露 open 方法 ====================
 
 // 打开新增 / 编辑对话框
-// id = 0 表示新增，id > 0 表示编辑
+// id > 0 编辑服务端数据，id <= 0 新增（优先加载草稿）
 const open = async (id: number) => {
   nowId.value = id
-
-  if (id) {
-    // 编辑模式：回显数据
+  if (id > 0) {
     await findById(id)
   } else {
-    // 新增模式：清空表单
-    clear()
+    const draft = localStore.load()
+    form.value = draft ? { ...draft, password: '' } : { ...formTemp }
   }
-
-  // 查询完成后打开对话框
   dialogVisible.value = true
+}
+
+// 弹框关闭时保存草稿（已提交/服务端数据则跳过）
+const handleCancel = () => {
+  if (saved.value) {
+    saved.value = false
+    return
+  }
+  if (nowId.value > 0) {
+    return
+  }
+  localStore.save({ ...form.value } as SysUser)
 }
 
 // ==================== 新增 / 修改 ====================
@@ -100,16 +109,10 @@ const addForm = async () => {
     return
   }
 
-  await createUser({
-    username: form.value.username,
-    password: form.value.password || '',
-    nickName: form.value.nickName || undefined,
-    email: form.value.email || undefined,
-    phone: form.value.phone || undefined,
-    status: form.value.status,
-  })
+  await createUser(form.value as SysUserRequest)
   ElMessage.success('用户创建成功')
-  localStore.add({ ...form.value, id: 0 } as SysUser)
+  localStore.remove()
+  saved.value = true
   dialogVisible.value = false
   emit('afterSave')
 }
@@ -123,13 +126,9 @@ const updateForm = async () => {
     return
   }
 
-  await updateUser(nowId.value, {
-    nickName: form.value.nickName || undefined,
-    email: form.value.email || undefined,
-    phone: form.value.phone || undefined,
-    status: form.value.status,
-  })
+  await updateUser(nowId.value, form.value as SysUserUpdate)
   ElMessage.success('用户更新成功')
+  saved.value = true
   dialogVisible.value = false
   emit('afterSave')
 }
@@ -143,7 +142,7 @@ defineExpose({
 
 <template>
   <div>
-    <el-dialog :title="isUpdate ? '编辑用户' : '新建用户'" draggable :close-on-click-modal="false" v-model="dialogVisible" @close="clear">
+    <el-dialog :title="isUpdate ? '编辑用户' : '新建用户'" draggable :close-on-click-modal="false" v-model="dialogVisible" @close="handleCancel">
       <el-form ref="formRef" @submit.prevent :model="form" :rules="rules" label-position="left" label-width="auto">
         <el-form-item label="用户名" prop="username">
             <el-input v-model="form.username" placeholder="请输入用户名" :disabled="isUpdate" clearable/>
@@ -171,7 +170,7 @@ defineExpose({
       <!-- 对话框底部按钮 -->
       <template #footer>
         <div style="margin-top: 30px">
-          <el-button @click="clear();dialogVisible = false">取消</el-button>
+          <el-button @click="dialogVisible = false">取消</el-button>
           <el-button @click="clear">清空</el-button>
           <el-button v-if="isUpdate" type="primary" @click="updateForm">修改</el-button>
           <el-button v-else type="primary" @click="addForm">新增</el-button>

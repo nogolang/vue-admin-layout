@@ -1,0 +1,96 @@
+// ==================== 全局通用样式 ====================
+// 本文件仅放全局级工具样式（reset、排版、滚动条、Element Plus 组件覆盖）。
+// 设计令牌、CSS 自定义属性定义在 css/variables.css。
+
+// ==================== 盒模型重置 ====================
+// border-box：元素宽高包含 padding 和 border，布局计算更直观
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// ==================== 根元素 ====================
+// 设置全站字体、字号、前景/背景色、字体平滑
+
+html,
+body {
+  height: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  -webkit-font-smoothing: antialiased;  // macOS Webkit 字体平滑
+  -moz-osx-font-smoothing: grayscale;   // macOS Firefox 字体平滑
+  accent-color: hsl(var(--primary));          // 表单控件（checkbox、radio）主题色
+  color-scheme: light;                  // 告知浏览器当前为亮色模式
+}
+
+// ==================== Vue 挂载点 & 链接 ====================
+
+#app {
+  height: 100%;
+}
+
+a {
+  text-decoration: none;  // 去掉默认下划线
+  color: inherit;         // 继承父元素颜色
+}
+
+// ==================== 滚动条美化 ====================
+// 全局统一滚动条样式，与设计令牌保持一致的配色
+
+::-webkit-scrollbar {
+  width: 6px;    // 垂直滚动条宽度
+  height: 6px;   // 水平滚动条高度
+}
+
+// 滚动条滑块（可拖动的部分）
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+// 滑块 hover 变深，提供交互反馈
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) /0.5);
+}
+
+// 滚动条轨道（滑块背景区域），透明不抢眼
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+// ==================== Element Plus 圆角统一覆盖 ====================
+// 强制所有 Element Plus 组件使用统一的 var(--radius)，保持视觉一致
+// !important 是因为 Element Plus 内部选择器特异性较高
+
+.el-input__wrapper,
+.el-textarea__inner,
+.el-select__wrapper {
+  border-radius: var(--radius) !important;
+}
+
+.el-button {
+  border-radius: var(--radius);
+}
+
+.el-card {
+  border-radius: var(--radius);
+}
+
+.el-dropdown-menu {
+  border-radius: var(--radius);
+}
+
+.el-dialog {
+  border-radius: var(--radius);
+}
+
+.el-message {
+  border-radius: var(--radius);
+}
+

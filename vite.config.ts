@@ -2,7 +2,6 @@
  * ==================== Vite 构建配置 ====================
  *
  * 主要配置项说明：
- *   - css.preprocessorOptions.scss.additionalData → 全局注入 SCSS 变量（无需手动 import）
  *   - plugins.AutoImport  → 自动导入 Element Plus 组件和 API（无需 import { ElButton }）
  *   - plugins.Components  → 自动注册 Element Plus 组件（按需加载，减小打包体积）
  *   - resolve.alias['@']  → 路径别名 @ → src/（简化 import 路径）
@@ -11,13 +10,13 @@
  */
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig, loadEnv, type ConfigEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode }: ConfigEnv) => {
   /**
    * 加载环境变量
    *
@@ -37,15 +36,6 @@ export default defineConfig(({ mode }) => {
     build: {
       // 根据环境变量控制 sourcemap（开发时开启方便调试，生产时关闭减小体积）
       sourcemap: env.VITE_SOURCEMAP === 'true',
-    },
-
-    // ==================== CSS 配置 ====================
-    css: {
-      preprocessorOptions: {
-        scss: {
-          api: 'modern-compiler',
-        },
-      },
     },
 
     // ==================== 插件 ====================

@@ -72,6 +72,11 @@ export interface SysApiGroupRequest {
 
 // ==================== API 接口 CRUD ====================
 
+/** 根据 ID 查询接口 */
+export async function getApiById(id: number) {
+  return request.get(`/admin/edu/sysApi/findById/${id}`)
+}
+
 /** 获取接口列表（分页） */
 export async function getApiList(params?: Record<string, any>) {
   return request.post('/admin/edu/sysApi/findAll', params || {})
@@ -93,6 +98,11 @@ export async function deleteApi(ids: number[]) {
 }
 
 // ==================== API 分组 CRUD ====================
+
+/** 根据 ID 查询分组 */
+export async function getApiGroupById(id: number) {
+  return request.get(`/admin/edu/sysApiGroup/findById/${id}`)
+}
 
 /** 获取分组列表（分页，含子接口） */
 export async function getApiGroupList(params?: Record<string, any>) {

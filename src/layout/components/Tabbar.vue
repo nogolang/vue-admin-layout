@@ -327,7 +327,7 @@ const currentAffix = () => {
     /* hover 态 */
     &:hover {
       color: hsl(var(--foreground));
-      background: hsl(var(--accent) / 0.5);
+      background: hsl(var(--accent) /0.5);
 
       .el-tabs__close {
         opacity: 0.7;

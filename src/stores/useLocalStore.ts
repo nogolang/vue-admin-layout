@@ -1,29 +1,37 @@
 // ==================== 通用 localStorage 持久化工具 ====================
-// 新增数据自动写入本地，刷新后依然可见，适用于开发调试场景
+// 表单草稿自动写入本地，刷新后依然可见，适用于开发调试场景
+//
+// 草稿流程：
+//   - 取消/关闭弹框时 → store.save(form) 保存草稿
+//   - 新增成功后 → store.remove() 删除草稿
+//   - 打开弹框时 → id > 0 从接口加载，id <= 0 从草稿加载
 //
 // 使用方式：
 //   const store = useLocalStore<SysUser>('sysUser')
-//   store.add({ ...formData, id: 0 })  // 新增（自动分配负 ID）
-//   store.load()                        // 读取所有本地记录
+//   store.save(formData)  // 保存草稿
+//   store.load()           // 读取草稿，无草稿返回 null
+//   store.remove()         // 删除草稿
 
-export function useLocalStore<T extends { id: number }>(key: string) {
-  /** 读取所有本地记录 */
-  const load = (): T[] => {
+export function useLocalStore<T>(key: string) {
+  /** 读取草稿，无草稿返回 null */
+  const load = (): T | null => {
     try {
-      return JSON.parse(localStorage.getItem(key) || '[]')
+      const raw = localStorage.getItem(key)
+      return raw ? JSON.parse(raw) : null
     } catch {
-      return []
+      return null
     }
   }
 
-  /** 新增一条记录，自动分配负 ID 避免与服务端 ID 冲突 */
-  const add = (item: T) => {
-    const items = load()
-    const ids = items.map((i) => i.id)
-    const nextId = ids.length ? Math.min(...ids, 0) - 1 : -1
-    items.push({ ...item, id: nextId })
-    localStorage.setItem(key, JSON.stringify(items))
+  /** 保存草稿（覆盖写入） */
+  const save = (item: T) => {
+    localStorage.setItem(key, JSON.stringify(item))
   }
 
-  return { load, add }
+  /** 删除草稿 */
+  const remove = () => {
+    localStorage.removeItem(key)
+  }
+
+  return { load, save, remove }
 }

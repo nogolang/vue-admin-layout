@@ -4,10 +4,12 @@ import { ElMessage } from 'element-plus'
 import {
   createApiGroup,
   updateApiGroup,
+  getApiGroupById,
   createApi,
   updateApi,
+  getApiById,
 } from '@/api/system/sysApi'
-import type { SysApi } from '@/api/system/sysApi'
+import type { SysApi, SysApiRequest, SysApiGroupRequest } from '@/api/system/sysApi'
 import { useLocalStore } from '@/stores/useLocalStore'
 
 const localStore = useLocalStore<SysApi>('local_sysApi')
@@ -15,6 +17,7 @@ const localStore = useLocalStore<SysApi>('local_sysApi')
 // ==================== 对话框状态 ====================
 
 const dialogVisible = ref(false)
+const saved = ref(false) // 标记是否已成功提交，防止 @close 时重复保存草稿
 const emit = defineEmits(['afterSave'])
 const formRef = ref()
 const formType = ref<'group' | 'api'>('api')
@@ -25,14 +28,14 @@ const nowGroupId = ref<number | undefined>(undefined)
 
 // 表单同时承载分组和接口两种类型的数据
 interface EditForm {
-  /** 分组名称 */
-  name: string
+  /** 分组名称（api 模式不使用） */
+  name?: string
   /** 接口路径（api 模式） */
   path: string
   /** 请求方法（api 模式） */
   method: string
   /** 描述 */
-  description: string
+  description?: string
 }
 
 const form = ref<EditForm>({
@@ -90,20 +93,45 @@ const clear = () => {
 // ==================== 对外暴露方法 ====================
 
 // 打开分组新增 / 编辑对话框
-const openGroup = (id: number) => {
+const openGroup = async (id: number) => {
   formType.value = 'group'
   nowId.value = id
-  clear()
+  if (id > 0) {
+    const res: any = await getApiGroupById(id)
+    const row = res?.data || res || {}
+    form.value = { name: row.name || '', path: '', method: 'GET', description: row.description || '' }
+  } else {
+    clear()
+  }
   dialogVisible.value = true
 }
 
 // 打开接口新增 / 编辑对话框
-const openApi = (id: number, groupId?: number) => {
+const open = async (id: number, groupId?: number) => {
   formType.value = 'api'
   nowId.value = id
   nowGroupId.value = groupId
-  clear()
+  if (id > 0) {
+    const res: any = await getApiById(id)
+    const row: SysApi = res?.data || res || {}
+    form.value = { name: '', path: row.path || '', method: row.method || 'GET', description: row.description || '' }
+  } else {
+    const draft = localStore.load()
+    form.value = draft ? { ...draft } : { ...formTemp }
+  }
   dialogVisible.value = true
+}
+
+// 弹框关闭时保存草稿（仅接口，已提交/服务端数据则跳过）
+const handleCancel = () => {
+  if (saved.value) {
+    saved.value = false
+    return
+  }
+  if (formType.value === 'group' || nowId.value > 0) {
+    return
+  }
+  localStore.save({ ...form.value, groupId: nowGroupId.value, id: 0 } as SysApi)
 }
 
 // ==================== 新增 / 修改 ====================
@@ -118,24 +146,15 @@ const addForm = async () => {
   }
 
   if (formType.value === 'group') {
-    // 新增分组
-    await createApiGroup({
-      name: form.value.name,
-      description: form.value.description || undefined,
-    })
+    await createApiGroup(form.value as SysApiGroupRequest)
     ElMessage.success('分组创建成功')
   } else {
-    // 新增接口
-    await createApi({
-      path: form.value.path,
-      method: form.value.method,
-      description: form.value.description || undefined,
-      groupId: nowGroupId.value,
-    })
+    await createApi({ ...form.value, groupId: nowGroupId.value } as SysApiRequest)
     ElMessage.success('接口创建成功')
-    localStore.add({ ...form.value, groupId: nowGroupId.value, id: 0 } as SysApi)
+    localStore.remove()
   }
 
+  saved.value = true
   dialogVisible.value = false
   emit('afterSave')
 }
@@ -150,23 +169,14 @@ const updateForm = async () => {
   }
 
   if (formType.value === 'group') {
-    // 修改分组
-    await updateApiGroup(nowId.value, {
-      name: form.value.name,
-      description: form.value.description || undefined,
-    })
+    await updateApiGroup(nowId.value, form.value as SysApiGroupRequest)
     ElMessage.success('分组更新成功')
   } else {
-    // 修改接口
-    await updateApi(nowId.value, {
-      path: form.value.path,
-      method: form.value.method,
-      description: form.value.description || undefined,
-      groupId: nowGroupId.value,
-    })
+    await updateApi(nowId.value, { ...form.value, groupId: nowGroupId.value } as SysApiRequest)
     ElMessage.success('接口更新成功')
   }
 
+  saved.value = true
   dialogVisible.value = false
   emit('afterSave')
 }
@@ -175,13 +185,13 @@ const updateForm = async () => {
 
 defineExpose({
   openGroup,
-  openApi,
+  open,
 })
 </script>
 
 <template>
   <div>
-    <el-dialog :title="title" draggable :close-on-click-modal="false" v-model="dialogVisible" @close="clear">
+    <el-dialog :title="title" draggable :close-on-click-modal="false" v-model="dialogVisible" @close="handleCancel">
       <el-form ref="formRef" @submit.prevent :model="form" :rules="rules" label-position="left" label-width="auto">
         <template v-if="formType === 'group'">
           <el-form-item label="分组名称" prop="name">
@@ -209,7 +219,7 @@ defineExpose({
       <!-- 对话框底部按钮 -->
       <template #footer>
         <div style="margin-top: 30px">
-          <el-button @click="clear();dialogVisible = false">取消</el-button>
+          <el-button @click="dialogVisible = false">取消</el-button>
           <el-button @click="clear">清空</el-button>
           <el-button v-if="isUpdate" type="primary" @click="updateForm">修改</el-button>
           <el-button v-else type="primary" @click="addForm">新增</el-button>

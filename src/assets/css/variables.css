@@ -1,0 +1,203 @@
+/* ==================== 设计令牌（CSS 自定义属性） ==================== */
+/* 全站视觉属性统一在此，通过 var(--xxx) 引用，支持运行时换肤 */
+/*
+ * 所有颜色值采用 HSL 格式（H S L），不含 hsl() 函数包裹，方便加透明度：
+ *   color: hsl(var(--primary));                // 普通使用
+ *   background: hsl(var(--primary) / 0.1);     // 10% 透明度
+ */
+
+:root {
+  /* ---- 基础排版 ---- */
+
+  /* 全局字体栈：优先系统原生字体，加载最快、渲染最稳定 */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* 根字号：1rem = 14px，Element Plus 默认值 */
+  --font-size-base: 14px;
+  /* 统一圆角：卡片、按钮、输入框等所有圆角元素共用 */
+  --radius: 0.5rem;
+
+  /* ---- 页面背景 & 前景 ---- */
+
+  /* 页面主体背景（白色） */
+  --background: 0 0% 100%;
+  /* 更深一级的背景（浅灰蓝），用于内容区与侧边栏形成层次 */
+  --background-deep: 216 20.11% 95.47%;
+  /* 主要文字色（深灰 #333 等效） */
+  --foreground: 210 6% 21%;
+
+  /* ---- 卡片 ---- */
+
+  /* 卡片背景 */
+  --card: 0 0% 100%;
+  /* 卡片文字色 */
+  --card-foreground: 222.2 84% 4.9%;
+
+  /* ---- 弹出层 ---- */
+
+  /* Dropdown、Popover、Select 下拉等弹出层背景 */
+  --popover: 0 0% 100%;
+  /* 弹出层文字色 */
+  --popover-foreground: 222.2 84% 4.9%;
+
+  /* ---- 主题色 ---- */
+
+  /* 品牌主色（蓝色），用于按钮、链接、激活态、焦点环等 */
+  --primary: 212 100% 45%;
+  /* 主色上的文字色（白色），用于深色背景按钮的文字 */
+  --primary-foreground: 0 0% 98%;
+
+  /* ---- 辅助色 ---- */
+
+  /* 次要背景色，用于次要按钮、标签等 */
+  --secondary: 240 5% 96%;
+  /* 次要背景上的文字色 */
+  --secondary-foreground: 240 6% 10%;
+
+  /* ---- 柔和背景 ---- */
+
+  /* 非核心区域背景（极浅灰） */
+  --muted: 240 4.8% 95.9%;
+  /* 柔和文字色（浅灰），用于描述文本、占位符、辅助说明等 */
+  --muted-foreground: 240 3.8% 46.1%;
+
+  /* ---- 强调/悬停态 ---- */
+
+  /* 最浅强调：菜单项 / 列表项 hover 背景 */
+  --accent: 240 5% 96%;
+  /* 中等强调 */
+  --accent-dark: 216 14% 93%;
+  /* 更深强调 */
+  --accent-darker: 216 11% 91%;
+  /* 更浅强调 */
+  --accent-lighter: 240 0% 98%;
+  /* hover 态（略深于 accent），用于交互元素悬停反馈 */
+  --accent-hover: 200 10% 90%;
+  /* 强调区域文字色 */
+  --accent-foreground: 240 6% 10%;
+
+  /* ---- 语义色 ---- */
+
+  /* 危险/删除（红色） */
+  --destructive: 359.33 100% 65.1%;
+  /* 危险按钮上的文字色 */
+  --destructive-foreground: 0 0% 98%;
+  /* 成功（绿色） */
+  --success: 144 57% 58%;
+  /* 成功按钮上的文字色 */
+  --success-foreground: 0 0% 98%;
+  /* 警告（橙色） */
+  --warning: 42 84% 61%;
+  /* 警告按钮上的文字色 */
+  --warning-foreground: 0 0% 98%;
+  /* 信息（浅灰） */
+  --info: 240 5% 96%;
+  /* 信息区域文字色 */
+  --info-foreground: 220 4% 58%;
+
+  /* ---- 边框 & 输入 ---- */
+
+  /* 标准边框色（浅灰），用于表格、卡片、分割线等 */
+  --border: 240 5.9% 90%;
+  /* 输入框边框色 */
+  --input: 240 5.88% 90%;
+  /* 输入框占位符文字颜色 */
+  --input-placeholder: 217 10.6% 65%;
+  /* 输入框背景色 */
+  --input-background: 0 0% 100%;
+
+  /* ---- 聚焦环 ---- */
+
+  /* 键盘聚焦时的 outline 颜色 */
+  --ring: 222.2 84% 4.9%;
+
+  /* ---- 遮罩层 ---- */
+
+  /* Modal、Drawer 等弹出层的背景遮罩（深色 45% 透明度） */
+  --overlay: 0 0% 0% / 45%;
+  /* 浅色遮罩 */
+  --overlay-content: 0 0% 95% / 45%;
+
+  /* ---- 阴影 ---- */
+
+  /* 浮动阴影：卡片、弹窗等抬起效果（三层叠加） */
+  --shadow-float: 0 6px 16px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%);
+  /* Header 底部浅阴影，分隔 Header 与内容区 */
+  --shadow-header: 0 1px 4px rgb(0 0 0 / 8%);
+  /* 侧边栏投影（柔和） */
+  --shadow-sidebar: 0 4px 20px rgb(0 0 0 / 4%);
+  /* 弹出层阴影：Dropdown、Popover、右键菜单等 */
+  --shadow-popover: 0 4px 16px rgb(0 0 0 / 8%);
+
+  /* ---- Z-Index 层级 ---- */
+
+  /* Header 层级（覆盖侧边栏） */
+  --z-header: 200;
+  /* 侧边栏层级 */
+  --z-sidebar: 100;
+  /* 弹出层层级（Dropdown、Drawer、Dialog 等，最高层） */
+  --z-popup: 3000;
+
+  /* ---- Header ---- */
+
+  /* Header 背景色 */
+  --header: 0 0% 100%;
+  /* Header 高度 */
+  --header-height: 50px;
+
+  /* ---- 侧边栏 ---- */
+
+  /* 侧边栏主体背景 */
+  --sidebar: 0 0% 100%;
+  /* 侧边栏深层背景（双列布局的第一列/图标列） */
+  --sidebar-deep: 216 20.11% 95.47%;
+  /* 垂直侧边栏展开宽度 */
+  --sidebar-width: 224px;
+  /* 垂直侧边栏折叠宽度 */
+  --sidebar-collapse-width: 60px;
+  /* 双列布局第一列宽度（图标列） */
+  --sidebar-mixed-width: 80px;
+  /* 双列布局第二列宽度（菜单面板） */
+  --sidebar-extra-width: 224px;
+
+  /* ---- 菜单项 ---- */
+
+  /* 菜单背景（跟随侧边栏） */
+  --menu: var(--sidebar);
+  /* 菜单缩进起点（MenuNode 组件按 depth × 16px + 12px 逐级叠加） */
+  --ml: 12px;
+  /* 菜单文字大小 */
+  --menu-font-size: 14px;
+  /* 菜单图标大小 */
+  --menu-icon-size: 16px;
+  /* 菜单项高度 */
+  --menu-item-height: 38px;
+  /* 菜单项圆角 */
+  --menu-item-radius: 8px;
+  /* 菜单项垂直间距 */
+  --menu-item-margin-y: 2px;
+  /* 菜单项水平间距 */
+  --menu-item-margin-x: 8px;
+
+  /* ---- Element Plus 字号覆盖 ---- */
+  /* Element Plus 通过 --el-font-size-* 变量控制组件字号，在此统一覆盖 */
+
+  /* 特大号 */
+  --el-font-size-extra-large: 20px !important;
+  /* 大号 */
+  --el-font-size-large: 18px !important;
+  /* 中号 */
+  --el-font-size-medium: 16px !important;
+  /* 基础字号跟随设计令牌 */
+  --el-font-size-base: var(--font-size-base) !important;
+  /* 小号 */
+  --el-font-size-small: 13px !important;
+  /* 特小号 */
+  --el-font-size-extra-small: 12px !important;
+
+  /* ---- 系统级设置 ---- */
+
+  /* 表单控件（checkbox、radio）主题色 */
+  accent-color: hsl(var(--primary));
+  /* 告知浏览器当前为亮色模式 */
+  color-scheme: light;
+}

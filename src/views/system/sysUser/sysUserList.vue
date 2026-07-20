@@ -36,7 +36,8 @@ const findAll = async () => {
       queryStr: query.value.queryStr || undefined,
     })
     const apiData = (res?.data?.records || []) as SysUser[]
-    tableData.value = [...apiData, ...localStore.load()]
+    const draft = localStore.load()
+    tableData.value = draft ? [...apiData, draft] : apiData
     total.value = Number.parseInt(res?.data?.total) || 0
   } finally {
     loading.value = false

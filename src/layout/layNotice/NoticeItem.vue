@@ -232,7 +232,7 @@ function hoverDescription(event: MouseEvent, description: string) {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.5715;
-  color: hsl(var(--muted-foreground) / 0.7);
+  color: hsl(var(--muted-foreground) /0.7);
 }
 </style>
 
