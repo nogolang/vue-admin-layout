@@ -61,9 +61,9 @@ export interface MenuItem {
   path: string
   name: string
   icon: string
-  component?: string
+  /** 静态菜单传 () => import(...)，动态菜单（后端）传字符串路径 */
+  component?: string | (() => Promise<Component>)
   children?: MenuItem[]
-  // 扩展字段：可按需添加，配合后端权限系统使用
   meta?: Record<string, any>
 }
 
@@ -81,7 +81,14 @@ export const staticMenus: MenuItem[] = [
     path: '/home',
     name: '首页',
     icon: 'HomeFilled',
-    component: '/home',
+    component: () => import('@/views/home/index.vue'),
+  },
+  {
+    path: '/login',
+    name: '登录',
+    icon: 'HomeFilled',
+    component: () => import('@/views/login/index.vue'),
+    meta: { hidden: true },
   },
   {
     path: '/system',
@@ -92,25 +99,25 @@ export const staticMenus: MenuItem[] = [
         path: '/system/role',
         name: '角色管理',
         icon: 'User',
-        component: '/system/role',
+        component: () => import('@/views/system/sysRole/sysRoleList.vue'),
       },
       {
         path: '/system/user',
         name: '用户管理',
         icon: 'User',
-        component: '/system/user',
+        component: () => import('@/views/system/sysUser/sysUserList.vue'),
       },
       {
         path: '/system/menu',
         name: '菜单管理',
         icon: 'Menu',
-        component: '/system/menu',
+        component: () => import('@/views/system/sysMenu/sysMenuList.vue'),
       },
       {
         path: '/system/api',
         name: '接口管理',
         icon: 'SetUp',
-        component: '/system/api',
+        component: () => import('@/views/system/sysApi/sysApiList.vue'),
       },
     ],
   },

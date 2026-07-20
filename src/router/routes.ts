@@ -3,30 +3,27 @@ import type { RouteRecordRaw } from 'vue-router'
 import type { MenuItem } from './menus'
 
 /**
- * ==================== 视图组件映射表 ====================
+ * ==================== 动态菜单组件映射表 ====================
  *
- * 将 MenuItem.component 的字符串路径映射到实际的 Vue 组件（懒加载）。
- * 所有需要动态注册的页面都必须在此添加映射关系。
- *
- * 添加新页面的步骤：
- *   1. 在 src/views/ 下创建 .vue 文件
- *   2. 在此添加一条映射：'/your/path': () => import('@/views/your-path/xxxList.vue')
- *   3. 在 menus.ts 的菜单数据中引用 component: '/your/path'
- *
- * 找不到对应 component 的菜单项会被静默跳过（不会注入路由）。
+ * 仅用于从后端获取的动态菜单（component 为字符串路径时）。
+ * 静态菜单已在 menus.ts 中直接使用 () => import(...)，无需此映射。
  */
 const componentMap: Record<string, () => Promise<Component>> = {
-  '/home': () => import('@/views/home/index.vue'),
-  '/system/role': () => import('@/views/system/sysRole/sysRoleList.vue'),
-  '/system/user': () => import('@/views/system/sysUser/sysUserList.vue'),
-  '/system/menu': () => import('@/views/system/sysMenu/sysMenuList.vue'),
-  '/system/api': () => import('@/views/system/sysApi/sysApiList.vue'),
   '/test/m1/g1/page1': () => import('@/views/test/m1/g1/page1.vue'),
   '/test/m1/g1/page2': () => import('@/views/test/m1/g1/page2.vue'),
   '/test/m1/g2/page1': () => import('@/views/test/m1/g2/page1.vue'),
   '/test/m2/g1/page1': () => import('@/views/test/m2/g1/page1.vue'),
   '/test/m1/g1/sg1/page1': () => import('@/views/test/m1/g1/sg1/page1.vue'),
   '/test/m1/g1/sg1/page2': () => import('@/views/test/m1/g1/sg1/page2.vue'),
+}
+
+/**
+ * 解析菜单项的 component 字段
+ * 静态菜单直接返回导入函数，动态菜单（字符串）从 componentMap 查找
+ */
+function resolveComponent(c: string | (() => Promise<Component>)): (() => Promise<Component>) | null {
+  if (typeof c === 'function') return c
+  return componentMap[c] || null
 }
 
 /**
@@ -71,18 +68,18 @@ export function menusToRoutes(menus: MenuItem[]): RouteRecordRaw[] {
         path: menu.path,
         name: pathToName(menu.path),
         redirect: firstChild.path,
-        meta: { title: menu.name, icon: menu.icon },
+        meta: { title: menu.name, icon: menu.icon, ...menu.meta },
       })
 
       // 如果父菜单自身也有 component → 额外生成一个 index 路由
       if (menu.component) {
-        const comp = componentMap[menu.component]
+        const comp = resolveComponent(menu.component)
         if (comp) {
           result.push({
-            path: menu.path + '/index', // 避免与 redirect 路由 path 冲突
+            path: menu.path + '/index',
             name: pathToName(menu.path) + '-index',
             component: comp,
-            meta: { title: menu.name + '概览', icon: menu.icon },
+            meta: { title: menu.name + '概览', icon: menu.icon, ...menu.meta },
           })
         }
       }
@@ -90,18 +87,16 @@ export function menusToRoutes(menus: MenuItem[]): RouteRecordRaw[] {
       // 递归处理子菜单
       result.push(...menusToRoutes(menu.children))
     } else if (menu.component) {
-      // 叶子节点 → 挂载实际的页面组件
-      const comp = componentMap[menu.component]
+      const comp = resolveComponent(menu.component)
       if (comp) {
         result.push({
           path: menu.path,
           name: pathToName(menu.path),
           component: comp,
-          meta: { title: menu.name, icon: menu.icon },
+          meta: { title: menu.name, icon: menu.icon, ...menu.meta },
         })
       } else {
-        // 组件未注册，跳过该路由（生产环境应记录日志）
-        console.warn(`[routes] component "${menu.component}" 未在 componentMap 中注册，已跳过`)
+        console.warn(`[routes] component "${String(menu.component)}" 未注册，已跳过`)
       }
     }
     // 没有 component 也没有 children 的菜单项 → 忽略

@@ -45,8 +45,8 @@ const layoutStore = useLayoutStore()
 const permissionStore = usePermissionStore()
 const userStore = useUserStore()
 
-/** 完整菜单树 = 静态菜单（首页等） + 动态菜单（权限/测试） */
-const menuList = computed(() => permissionStore.allMenus)
+/** 侧边栏菜单（过滤掉 meta.hidden 的页面，如登录页） */
+const menuList = computed(() => permissionStore.allMenus.filter((m) => !m.meta?.hidden))
 
 // ==================== 3. 侧边栏拖拽调整宽度 ====================
 //

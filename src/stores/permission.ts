@@ -100,10 +100,15 @@ export const usePermissionStore = defineStore('permission', () => {
     // 存储动态菜单数据
     dynamicMenus.value = menus
 
-    // 静态菜单 + 动态菜单 → 路由配置 → 逐个注册到 'Root' 布局路由下
+    // 静态菜单 + 动态菜单 → 路由配置
     const routes = menusToRoutes([...staticMenus, ...menus])
     for (const route of routes) {
-      addRoute(route)
+      if (route.meta?.hidden) {
+        // 隐藏路由（如登录页）注册为顶层路由，不包裹在 BasicLayout 中
+        router.addRoute(route)
+      } else {
+        addRoute(route)
+      }
     }
 
     // 标记加载完成
