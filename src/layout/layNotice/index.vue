@@ -20,9 +20,8 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Bell } from '@element-plus/icons-vue'
 import { ArrowRight } from '@element-plus/icons-vue'
-import { env } from '@/app.config'
 import { useUserStore } from '@/stores/user'
-import { markNoticeRead } from '@/api/auth'
+import { markNoticeRead, createNoticeSSE } from '@/api/user/notice'
 import { createEmptyTabs } from './data'
 import type { ListItem, TabItem } from './data'
 import NoticeList from './NoticeList.vue'
@@ -31,146 +30,18 @@ defineOptions({ name: 'LayNotice' })
 
 // ==================== SSE 连接 ====================
 
-/**
- * 连接时机：
- *
- *   登录 → token 存入 userStore → 路由守卫放行 → BasicLayout 渲染 → <LayNotice /> 挂载
- *   → onMounted() → connectSSE()  ← 此时 token 已就绪，Authorization header 有效
- *
- * 为什么不用 EventSource 或 axios？
- *
- *   EventSource  → 不支持自定义请求头，token 只能放 URL 上，不安全
- *   axios        → 浏览器端基于 XHR，会缓冲完整响应才返回，无法流式逐帧读取
- *
- * 因此使用 fetch + ReadableStream 手动实现 SSE：
- *   1. fetch 发起 GET，Authorization header 携带 token
- *   2. response.body.getReader() 获取可读流
- *   3. TextDecoder 逐块解码 → 拼入 buffer
- *   4. 以 \n\n 分隔 SSE 帧 → 逐帧解析 event / data 字段
- */
+let sse: ReturnType<typeof createNoticeSSE> | null = null
 
-/** AbortController — 组件卸载时 abort 掉 fetch，避免内存泄漏 */
-let abortController: AbortController | null = null
-
-/**
- * 建立 SSE 连接
- *
- * 执行流程：
- *   1. 从 userStore 取 token → 放 Authorization header
- *   2. fetch 发起 GET /userInfo/notice/sse
- *   3. 获取 ReadableStream reader → 循环 read()
- *   4. TextDecoder 解码字节 → 拼入 buffer 字符串
- *   5. \n\n 作为帧分隔符（SSE 标准格式）
- *   6. 解析每帧的 event / data 字段
- *   7. event === 'notice' → JSON.parse(data) → pushNotice()
- *
- * 错误处理：
- *   - 响应非 2xx / 无 body → 3 秒后重连
- *   - 流中断（done=true）→ 循环结束
- *   - AbortError（组件卸载）→ 静默退出，不重连
- *   - 其他网络错误 → 3 秒后重连
- */
-async function connectSSE() {
+function connectSSE() {
   const token = useUserStore().getToken()
   if (!token) return
-
-  // 每次连接前新建 AbortController（旧的已 abort 无法复用）
-  abortController = new AbortController()
-
-  try {
-    const response = await fetch(`${env.apiBaseUrl}/userInfo/notice/sse`, {
-      headers: { Authorization: token },
-      signal: abortController.signal,
-    })
-
-    // 非 2xx 或无响应体 → 等待重连
-    if (!response.ok || !response.body) {
-      scheduleReconnect()
-      return
-    }
-
-    const reader = response.body.getReader()
-    const decoder = new TextDecoder()
-    let buffer = ''
-
-    // 循环读取流数据，直到 done 或出错
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-
-      // 解码当前 chunk，拼入 buffer（stream: true 保留多字节字符的完整性）
-      buffer += decoder.decode(value, { stream: true })
-
-      // SSE 帧以隔一个空行分隔 → 按 \n\n 切分
-      const parts = buffer.split('\n\n')
-      // 最后一段可能不完整，留在 buffer 等下一次拼接
-      buffer = parts.pop() || ''
-
-      for (const part of parts) {
-        const parsed = parseSSEFrame(part)
-        if (parsed.event === 'notice' && parsed.data) {
-          try {
-            pushNotice(JSON.parse(parsed.data))
-          } catch {
-            console.warn('[LayNotice] SSE 数据解析失败', parsed.data)
-          }
-        }
-      }
-    }
-  } catch (err: any) {
-    // AbortError = 主动断开（disconnectSSE）→ 不重连
-    if (err.name !== 'AbortError') {
-      scheduleReconnect()
-    }
-  }
+  sse = createNoticeSSE(token, pushNotice)
+  sse.connect()
 }
 
-/**
- * 解析单个 SSE 帧
- *
- * SSE 标准帧格式（每行一个字段）：
- *   event: notice
- *   data: {"type":"1","title":"系统维护通知","description":"..."}
- *
- * 两个字段之间用 \n 分隔，帧之间用 \n\n 分隔。
- *
- * @param frame  原始帧字符串（不含末尾的 \n\n）
- * @returns      提取出的 { event, data }
- */
-function parseSSEFrame(frame: string): { event?: string; data?: string } {
-  const result: { event?: string; data?: string } = {}
-  for (const line of frame.split('\n')) {
-    if (line.startsWith('event: ')) {
-      result.event = line.slice(7) // 去掉 "event: " 前缀
-    } else if (line.startsWith('data: ')) {
-      result.data = line.slice(6) // 去掉 "data: " 前缀
-    }
-  }
-  return result
-}
-
-/**
- * 断开后延迟重连
- *
- * 等待 3 秒后重试，避免网络抖动时频繁请求。
- * 重试前检查 AbortController 是否已被 abort（组件可能已卸载）。
- */
-function scheduleReconnect() {
-  setTimeout(() => {
-    if (abortController && !abortController.signal.aborted) {
-      connectSSE()
-    }
-  }, 3000)
-}
-
-/**
- * 断开 SSE 连接（组件卸载时调用）
- *
- * abort() 会触发 fetch 抛出 AbortError，connectSSE 捕获后静默退出。
- */
 function disconnectSSE() {
-  abortController?.abort()
-  abortController = null
+  sse?.disconnect()
+  sse = null
 }
 
 // ==================== 通知数据管理 ====================

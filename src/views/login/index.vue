@@ -12,7 +12,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { appConfig, APP_TITLE } from '@/app.config'
 import { useUserStore } from '@/stores/user'
-import { login } from '@/api/auth'
+import { login } from '@/api/user/auth'
 
 defineOptions({ name: 'LoginPage' })
 

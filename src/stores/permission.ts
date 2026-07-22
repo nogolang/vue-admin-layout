@@ -5,7 +5,7 @@ import router from '@/router'
 import type { MenuItem } from '@/router/menus'
 import { dynamicMenuList, staticMenus } from '@/router/menus'
 import { menusToRoutes } from '@/router/routes'
-import { fetchUserInfo } from '@/api/auth'
+import { fetchUserInfo } from '@/api/user/auth'
 import { appConfig, setHomePath } from '@/app.config'
 
 /**
