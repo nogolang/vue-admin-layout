@@ -19,9 +19,9 @@ export interface LoginResult {
  * 登录
  *
  * POST /admin/shop/adminInfo/login，在请求拦截器白名单中，无需预先携带 token。
- * 响应拦截器已解包 response.data，调用方直接拿到 { token: '...' }。
+ * 响应拦截器解包后返回完整响应体 { code, message, data }，data 中含 token。
  */
-export async function login(data: LoginRequest): Promise<LoginResult> {
+export async function login(data: LoginRequest) {
   return request.post('/admin/shop/adminInfo/login', data)
 }
 
@@ -61,7 +61,8 @@ export interface UserInfoResult {
  */
 export async function fetchUserInfo(): Promise<UserInfoResult> {
   if (appConfig.login.useBackendLogin) {
-    return request.post('/admin/shop/adminInfo/info')
+    const res = await request.post('/admin/shop/adminInfo/info')
+    return res.data
   }
   return { menus: [], home: '/home' }
 }

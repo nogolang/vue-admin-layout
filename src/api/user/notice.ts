@@ -54,12 +54,12 @@ export interface NoticeSSE {
  *   - AbortError（主动 disconnect）→ 静默退出，不重连
  *   - 其他网络错误 → 3 秒后重连
  *
- * @param token    认证令牌（Authorization header 值）
+ * @param getToken  获取认证令牌的函数，每次请求时调用，确保始终拿到最新 token
  * @param onNotice  收到通知时的回调，传入解析后的 NoticeItem
  * @returns         连接句柄 { disconnect }
  */
 export function createNoticeSSE(
-  token: string,
+  getToken: () => string,
   onNotice: (item: NoticeItem) => void,
 ): NoticeSSE {
   /** AbortController — disconnect 时 abort 掉 fetch，避免内存泄漏 */
@@ -106,7 +106,7 @@ export function createNoticeSSE(
 
     try {
       const response = await fetch(`${env.apiBaseUrl}/adminInfo/notice/sse`, {
-        headers: { Authorization: token },
+        headers: { Authorization: getToken() },
         signal: abortController.signal,
       })
 

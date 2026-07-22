@@ -48,7 +48,7 @@ async function handleLogin() {
   try {
     if (appConfig.login.useBackendLogin) {
       const result = await login(loginForm.value)
-      useUserStore().setToken(`Bearer ${result.token}`)
+      useUserStore().setToken(`Bearer ${result.data}`)
     } else {
       // 前端模拟登录，用于不依赖后端的开发测试
       await new Promise((r) => setTimeout(r, 600))

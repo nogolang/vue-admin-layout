@@ -34,10 +34,9 @@ defineOptions({ name: 'LayNotice' })
 let sse: ReturnType<typeof createNoticeSSE> | null = null
 
 function connectSSE() {
-  const token = useUserStore().getToken()
-  if (!token) return
+  if (!useUserStore().getToken()) return
   disconnectSSE()
-  sse = createNoticeSSE(token, pushNotice)
+  sse = createNoticeSSE(() => useUserStore().getToken(), pushNotice)
 }
 
 function disconnectSSE() {
