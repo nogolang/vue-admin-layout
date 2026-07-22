@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, toRaw } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getMenuById, createMenu, updateMenu } from '@/api/system/sysMenu'
-import type { SysMenu, MenuType, SysMenuRequest } from '@/api/system/sysMenu'
+import { getMenuById, createMenu, updateMenu } from '@/api/permission/sysMenu'
+import type { SysMenu, MenuType, SysMenuRequest } from '@/api/permission/sysMenu'
 import { useLocalStore } from '@/stores/useLocalStore'
 
 const localStore = useLocalStore<SysMenu>('local_sysMenu')

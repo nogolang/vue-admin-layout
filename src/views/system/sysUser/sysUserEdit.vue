@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, toRaw } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getUserById, createUser, updateUser } from '@/api/system/sysUser'
-import type { SysUser, SysUserRequest, SysUserUpdate } from '@/api/system/sysUser'
+import { getUserById, createUser, updateUser } from '@/api/permission/sysUser'
+import type { SysUser, SysUserRequest, SysUserUpdate } from '@/api/permission/sysUser'
 import { useLocalStore } from '@/stores/useLocalStore'
 
 const localStore = useLocalStore<SysUser>('local_sysUser')

@@ -2,8 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete } from '@element-plus/icons-vue'
-import { getMenuTree, deleteMenu } from '@/api/system/sysMenu'
-import type { SysMenu } from '@/api/system/sysMenu'
+import { getMenuTree, deleteMenu } from '@/api/permission/sysMenu'
+import type { SysMenu } from '@/api/permission/sysMenu'
 import SysMenuEdit from './sysMenuEdit.vue'
 import { useLocalStore } from '@/stores/useLocalStore'
 

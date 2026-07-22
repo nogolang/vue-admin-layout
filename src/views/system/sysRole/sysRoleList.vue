@@ -9,8 +9,8 @@ import {
   getMenusByRoleId,
   assignApiToRole,
   getApisByRoleId,
-} from '@/api/system/sysRole'
-import type { SysRole } from '@/api/system/sysRole'
+} from '@/api/permission/sysRole'
+import type { SysRole } from '@/api/permission/sysRole'
 import SysRoleEdit from './sysRoleEdit.vue'
 import { useLocalStore } from '@/stores/useLocalStore'
 

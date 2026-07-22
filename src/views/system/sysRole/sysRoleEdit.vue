@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, toRaw } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getRoleById, createRole, updateRole } from '@/api/system/sysRole'
-import type { SysRole, SysRoleRequest } from '@/api/system/sysRole'
+import { getRoleById, createRole, updateRole } from '@/api/permission/sysRole'
+import type { SysRole, SysRoleRequest } from '@/api/permission/sysRole'
 import { useLocalStore } from '@/stores/useLocalStore'
 
 const localStore = useLocalStore<SysRole>('local_sysRole')

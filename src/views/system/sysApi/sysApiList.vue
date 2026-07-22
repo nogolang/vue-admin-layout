@@ -2,8 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, FolderAdd } from '@element-plus/icons-vue'
-import { getApiGroupList, deleteApi, deleteApiGroup } from '@/api/system/sysApi'
-import type { SysApi, SysApiGroup } from '@/api/system/sysApi'
+import { getApiGroupList, deleteApi, deleteApiGroup } from '@/api/permission/sysApi'
+import type { SysApi, SysApiGroup } from '@/api/permission/sysApi'
 import SysApiEdit from './sysApiEdit.vue'
 
 // ==================== 类型定义 ====================

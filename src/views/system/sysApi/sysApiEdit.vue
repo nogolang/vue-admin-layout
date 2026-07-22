@@ -8,8 +8,8 @@ import {
   createApi,
   updateApi,
   getApiById,
-} from '@/api/system/sysApi'
-import type { SysApi, SysApiRequest, SysApiGroupRequest } from '@/api/system/sysApi'
+} from '@/api/permission/sysApi'
+import type { SysApi, SysApiRequest, SysApiGroupRequest } from '@/api/permission/sysApi'
 
 // ==================== 对话框状态 ====================
 
