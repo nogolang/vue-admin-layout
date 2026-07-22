@@ -138,7 +138,6 @@ async function handleLogin() {
           </el-form-item>
         </el-form>
 
-        <p class="form-tip">{{ appConfig.login.useBackendLogin ? '已启用后端登录' : '前端模拟登录，输入用户名即可' }}</p>
       </div>
     </div>
   </div>
@@ -237,12 +236,5 @@ async function handleLogin() {
 
 .login-btn {
   width: 100%;
-}
-
-.form-tip {
-  margin-top: 24px;
-  font-size: 13px;
-  color: hsl(var(--muted-foreground));
-  text-align: center;
 }
 </style>
