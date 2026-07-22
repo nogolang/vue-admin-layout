@@ -44,33 +44,6 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       vue(),
 
       /**
-       * SPA History 模式 fallback
-       *
-       * 解决刷新页面 404 问题：
-       *   开发服务器不认识前端路由路径（如 /user/list），
-       *   当请求头接受 text/html 且路径不含文件后缀时，回退到 index.html。
-       *
-       * 生产环境同样需要服务端配置（Nginx try_files 等）。
-       */
-      {
-        name: 'spa-fallback',
-        configureServer(server) {
-          return () => {
-            server.middlewares.use((req, _, next) => {
-              const cleanUrl = req.url?.split('?')[0] || ''
-              if (
-                req.headers.accept?.includes('text/html') &&
-                !cleanUrl.includes('.')
-              ) {
-                req.url = '/'
-              }
-              next()
-            })
-          }
-        },
-      },
-
-      /**
        * 自动导入 API（Composition API、工具函数等）
        *
        * 效果：无需手动写 import { ref } from 'vue'，直接使用 ref() 即可
