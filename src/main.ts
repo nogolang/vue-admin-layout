@@ -38,12 +38,13 @@ const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 app.use(pinia)
 
-app.use(router)
-
-// 根据配置决定路由加载时机：'startup' → 应用启动时加载，'login' → 登录成功后加载
+// 先加载动态路由，再注册 router，否则 app.use(router) 触发初始导航时
+// 动态路由尚未注入，页面刷新后会命中 404 通配符
 if (appConfig.route.loadRoutesOn === 'startup') {
   await usePermissionStore().generateRoutes()
 }
+
+app.use(router)
 
 setupRouterGuard(router)
 
