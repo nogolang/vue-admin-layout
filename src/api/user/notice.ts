@@ -31,7 +31,6 @@ export interface NoticeItem {
 
 /** SSE 连接句柄 */
 export interface NoticeSSE {
-  connect: () => Promise<void>
   disconnect: () => void
 }
 
@@ -57,7 +56,7 @@ export interface NoticeSSE {
  *
  * @param token    认证令牌（Authorization header 值）
  * @param onNotice  收到通知时的回调，传入解析后的 NoticeItem
- * @returns         连接句柄 { connect, disconnect }
+ * @returns         连接句柄 { disconnect }
  */
 export function createNoticeSSE(
   token: string,
@@ -167,5 +166,7 @@ export function createNoticeSSE(
     abortController = null
   }
 
-  return { connect, disconnect }
+  // 创建即连接
+  connect()
+  return { disconnect }
 }

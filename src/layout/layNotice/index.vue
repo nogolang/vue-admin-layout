@@ -22,6 +22,7 @@ import { Bell } from '@element-plus/icons-vue'
 import { ArrowRight } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { markNoticeRead, createNoticeSSE } from '@/api/user/notice'
+import type { NoticeItem } from '@/api/user/notice'
 import { createEmptyTabs } from './data'
 import type { ListItem, TabItem } from './data'
 import NoticeList from './NoticeList.vue'
@@ -35,8 +36,8 @@ let sse: ReturnType<typeof createNoticeSSE> | null = null
 function connectSSE() {
   const token = useUserStore().getToken()
   if (!token) return
+  disconnectSSE()
   sse = createNoticeSSE(token, pushNotice)
-  sse.connect()
 }
 
 function disconnectSSE() {
@@ -60,10 +61,10 @@ const dropdownRef = ref<{ handleClose: () => void } | null>(null)
  *
  * @param item  SSE 推送的单条通知数据
  */
-function pushNotice(item: ListItem) {
+function pushNotice(item: NoticeItem) {
   const tab = notices.value.find((t) => t.key === item.type)
   if (tab) {
-    tab.list.unshift(item)
+    tab.list.unshift(item as ListItem)
   }
 }
 
