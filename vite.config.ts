@@ -5,6 +5,7 @@
  *   - plugins.AutoImport  → 自动导入 Element Plus 组件和 API（无需 import { ElButton }）
  *   - plugins.Components  → 自动注册 Element Plus 组件（按需加载，减小打包体积）
  *   - resolve.alias['@']  → 路径别名 @ → src/（简化 import 路径）
+ *   - server.host         → 监听地址（true 表示 0.0.0.0，允许局域网访问）
  *   - server.port         → 开发服务器端口
  *   - server.proxy        → 开发代理（解决跨域问题）
  */
@@ -81,6 +82,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
 
     // ==================== 开发服务器 ====================
     server: {
+      host: true, // 监听 0.0.0.0，允许局域网访问
       port: 5100, // 开发服务器端口
 
       /**
