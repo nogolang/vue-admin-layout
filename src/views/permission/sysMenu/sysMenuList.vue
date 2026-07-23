@@ -95,7 +95,7 @@ onMounted(() => {
     </div>
 
     <!-- 菜单树表格 -->
-    <el-table
+    <el-table v-table-scroll
       v-loading="loading"
       :data="tableData"
       row-key="id"

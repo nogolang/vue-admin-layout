@@ -30,9 +30,15 @@ import { setupRouterGuard } from './router/guard'
 import { usePermissionStore } from './stores/permission'
 import { appConfig } from './app.config'
 
+// ==================== 全局指令 ====================
+import { vTableScroll } from './utils/elementUtils/tableScroll'
+
 const app = createApp(App)
 
 app.use(ElementPlus, { zIndex: 3000 })
+
+// 注册表格横向滚动指令：el-table 上添加 v-table-scroll 即可在列溢出时滚轮横向滚动
+app.directive('table-scroll', vTableScroll)
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)

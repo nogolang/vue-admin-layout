@@ -142,7 +142,7 @@ onMounted(() => {
     </div>
 
     <!-- 接口树形表格 -->
-    <el-table
+    <el-table v-table-scroll
       v-loading="loading"
       :data="tableData"
       row-key="rowKey"
