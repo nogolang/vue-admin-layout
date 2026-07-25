@@ -194,6 +194,9 @@
   /* 特小号 */
   --el-font-size-extra-small: 12px !important;
 
+  /* 小字号（表格单元格、辅助文字等） */
+  --font-size-sm: 13px;
+
   /* ---- 系统级设置 ---- */
 
   /* 表单控件（checkbox、radio）主题色 */

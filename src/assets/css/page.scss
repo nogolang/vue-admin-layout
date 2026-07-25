@@ -22,5 +22,17 @@
 /* 工具栏右侧（搜索区） */
 .toolbar-right {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
+  row-gap: 6px;
+}
+
+/* 工具栏标签：与输入框/选择框垂直居中对齐 */
+.toolbar-label {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }

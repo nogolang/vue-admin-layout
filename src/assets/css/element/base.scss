@@ -1,0 +1,4 @@
+// 去掉 elementUI 下拉菜单的黑色边框
+.el-tooltip__trigger:focus-visible {
+  outline: unset;
+}

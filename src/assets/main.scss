@@ -94,3 +94,116 @@ a {
   border-radius: var(--radius);
 }
 
+// ==================== 工具类 ====================
+
+.text-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.clearfix::after {
+  content: "";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+.my_red { color: hsl(var(--destructive)); }
+.my_blue { color: hsl(var(--primary)); }
+.my_float_left { float: left; }
+.cursor-pointer { cursor: pointer; }
+
+.configSaveButton {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ---- 按钮主色对齐 ---- */
+.el-button--primary {
+  --el-button-bg-color: hsl(var(--primary));
+  --el-button-border-color: hsl(var(--primary));
+  --el-button-hover-bg-color: hsl(var(--primary) / 85%);
+  --el-button-hover-border-color: hsl(var(--primary) / 85%);
+}
+
+/* ---- 分页 ---- */
+.el-pagination {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-button-bg-color: transparent;
+  .btn-next, .btn-prev, .el-pager li {
+    border-radius: calc(var(--radius) - 0.125rem);
+    &:hover { background-color: hsl(var(--accent)); }
+  }
+  .el-pager li.is-active {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+}
+
+/* ---- 输入框 ---- */
+.el-input .el-input__wrapper {
+  border-radius: calc(var(--radius) - 0.125rem);
+  box-shadow: 0 0 0 1px hsl(var(--border)) inset;
+  &:hover { box-shadow: 0 0 0 1px hsl(var(--border)) inset; }
+  &.is-focus { box-shadow: 0 0 0 1px hsl(var(--primary)) inset; }
+}
+
+/* ---- tag ---- */
+.el-tag {
+  border-radius: calc(var(--radius) - 0.25rem);
+}
+
+/* ---- 表格 ---- */
+.el-table {
+  --el-table-border-color: hsl(var(--border));
+  --el-table-header-bg-color: hsl(var(--accent));
+  --el-table-header-text-color: hsl(var(--foreground));
+  --el-table-text-color: hsl(var(--foreground) / 75%);
+  --el-table-row-hover-bg-color: hsl(var(--accent-hover));
+  border-radius: calc(var(--radius) - 0.125rem);
+  overflow: hidden;
+
+  /* 去掉外框 */
+  :deep(.el-table__inner-wrapper::before) { height: 0; }
+
+  /* 表头 — 白底 + 底边框 */
+  .el-table__header th {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    background-color: hsl(var(--background));
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  /* 行 hover */
+  .el-table__body tr:hover > td {
+    background-color: hsl(var(--accent-hover)) !important;
+  }
+
+  /* 斑马纹 */
+  &.el-table--striped .el-table__body tr.el-table__row--striped td {
+    background-color: hsl(var(--accent) / 60%);
+  }
+
+  /* 单元格 */
+  td, th { font-size: var(--font-size-sm); }
+
+  /* fixed 列必须有背景，否则透明遮挡后面内容 */
+  .el-table__fixed,
+  .el-table__fixed-right {
+    background-color: hsl(var(--background));
+  }
+}
+
+/* ---- Card ---- */
+.el-card {
+  --el-card-border-radius: var(--radius);
+  border-color: hsl(var(--border));
+}
+
+/* ---- Dialog ---- */
+.el-dialog {
+  --el-dialog-border-radius: var(--radius);
+}
